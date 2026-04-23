@@ -7,4 +7,4 @@
 
 - Clone the repository.
 - Use `git config core.hooksPath hooks/` to set up the hooks.
-- Don't developt on the `main` branch, create a new branch for your work.
+- Don't develop on the `main` branch, create a new branch for your work.
