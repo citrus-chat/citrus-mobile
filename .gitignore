@@ -32,3 +32,25 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Gradle & Build
+.gradle/
+build/
+.externalNativeBuild
+.cxx/
+*.apk
+*.aab
+
+# IDE & Local
+.idea/
+*.iml
+local.properties
+
+# Kotlin
+.kotlin/
+
+# Keys & Logs
+*.jks
+*.keystore
+*.log
+.DS_Store
