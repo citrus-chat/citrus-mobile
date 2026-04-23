@@ -24,4 +24,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "citrus-mobile"
 include(":app")
- 
