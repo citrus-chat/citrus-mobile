@@ -18,7 +18,7 @@ jobs:
           cache: 'gradle'
 
       - name: Check Formatting
-        run: ./gradlew lktlintFormat
+        run: ./gradlew ktlintFormat
 
       - name: Run Detekt
         run: ./gradlew detekt
