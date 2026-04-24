@@ -1,0 +1,39 @@
+[*.{kt,kts}]
+# -----------------------------------------------------------------------------
+# Rules that cannot be auto-corrected (Standard Rules)
+# -----------------------------------------------------------------------------
+
+# Cannot decide which specific imports to use to replace the wildcard
+ktlint_standard_no-wildcard-imports = disabled
+
+# Cannot safely rename files on disk to match class names
+ktlint_standard_filename = disabled
+
+# Cannot safely rename your properties/variables to match naming conventions
+ktlint_standard_property-naming = disabled
+
+# Cannot safely rename your functions to match naming conventions
+ktlint_standard_function-naming = disabled
+
+# Cannot safely rename your enum entries
+ktlint_standard_enum-entry-name-case = disabled
+
+# Cannot safely rename your package to match directory structure
+ktlint_standard_package-name = disabled
+
+# Cannot decide where to split a line that is too long
+ktlint_standard_max-line-length = disabled
+
+# Cannot safely reorder or change modifiers without potentially changing semantics
+ktlint_standard_modifier-order = disabled
+
+# Cannot safely decide where to add curly braces in some complex if-else logic
+ktlint_standard_multiline-if-else = disabled
+
+# -----------------------------------------------------------------------------
+# Formatting Settings (These ARE auto-correctable)
+# -----------------------------------------------------------------------------
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
