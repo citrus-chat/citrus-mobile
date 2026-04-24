@@ -1,14 +1,34 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("org.jlleitschuh.gradle.ktlint")
+    id("dev.detekt")
+}
+
+// Detekt configuration inside app
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    // Points to a config file inside the app module
+    config.setFrom(files("detekt-config.yml"))
+}
+
+// Ktlint configuration inside app
+ktlint {
+    android = true
+    verbose = true
+    outputToConsole = true
+    ignoreFailures = false
+    enableExperimentalRules = true
 }
 
 android {
     namespace = "com.citruschat.citrusmobile"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version =
+            release(36) {
+                minorApiLevel = 1
+            }
     }
 
     defaultConfig {
@@ -26,7 +46,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }

@@ -18,10 +18,10 @@ jobs:
           cache: 'gradle'
 
       - name: Check Formatting
-        run: ./gradlew ktlintFormat
+        run: ./gradlew :app:ktlintFormat
 
       - name: Run Detekt
-        run: ./gradlew detekt
+        run: ./gradlew :app:detekt
 
       - name: Run Android Lint
         run: ./gradlew lintDebug
