@@ -19,7 +19,7 @@ echo -e "${BLUE}▶ Starting Kotlin/Android Quality Checks...${NC}"
 
 echo -ne "  [1/4] Formatting (ktlint)... "
 # 2. Only format the staged files (much faster)
-./gradlew ktlintFormat --rerun-tasks --no-daemon --no-configuration-cache 2>&1
+./gradlew ktlintFormat 2>&1
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}FIXED/OK${NC}"
