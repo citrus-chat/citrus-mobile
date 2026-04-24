@@ -19,7 +19,7 @@ echo -e "${BLUE}▶ Starting Kotlin/Android Quality Checks...${NC}"
 
 echo -ne "  [1/4] Formatting (ktlint)... "
 # 2. Only format the staged files (much faster)
-./gradlew ktlintFormat 2>&1
+./gradlew :app:ktlintFormat 2>&1
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}FIXED/OK${NC}"
@@ -40,7 +40,7 @@ fi
 
 # 2. Static Analysis (Detekt)
 echo -ne "  [2/4] Analysis (Detekt)... "
-./gradlew detekt > "$LOG_FILE" 2>&1
+./gradlew :app:detekt > "$LOG_FILE" 2>&1
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}PASSED${NC}"
 else

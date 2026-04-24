@@ -1,6 +1,25 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("org.jlleitschuh.gradle.ktlint")
+    id("dev.detekt")
+}
+
+// Detekt configuration inside app
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    // Points to a config file inside the app module
+    config.setFrom(files("detekt-config.yml"))
+}
+
+// Ktlint configuration inside app
+ktlint {
+    android = true
+    verbose = true
+    outputToConsole = true
+    ignoreFailures = false
+    enableExperimentalRules = true
 }
 
 android {
