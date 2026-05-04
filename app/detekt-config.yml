@@ -16,9 +16,14 @@ style:
     ignoreNamedArgument: true
     ignoreEnums: true
 
+complexity:
+    LongMethod:
+        active: false
+
 naming:
   FunctionNaming:
     active: true
     ignoreAnnotated:
       - 'Composable'
     functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+
