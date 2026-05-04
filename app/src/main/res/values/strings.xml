@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">citrus-mobile</string>
+    <string name="chatInput_placeholder">Enter a message...</string>
 </resources>
