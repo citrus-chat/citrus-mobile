@@ -1,4 +1,4 @@
-package com.citruschat.citrusmobile.ui.components
+package com.citruschat.citrusmobile.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

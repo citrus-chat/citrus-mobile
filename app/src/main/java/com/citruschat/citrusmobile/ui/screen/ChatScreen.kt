@@ -10,26 +10,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.citruschat.citrusmobile.R
-import com.citruschat.citrusmobile.domain.model.Message
-import com.citruschat.citrusmobile.ui.components.ChatInput
-import com.citruschat.citrusmobile.ui.components.MessageBubble
+import com.citruschat.citrusmobile.ui.component.ChatInput
+import com.citruschat.citrusmobile.ui.component.MessageBubble
+import com.citruschat.citrusmobile.ui.viewmodel.ChatViewModel
 
 @Composable
 fun ChatScreen(
-    initialMessages: List<Message>,
     modifier: Modifier = Modifier,
     isInGroup: Boolean = false,
+    viewModel: ChatViewModel = hiltViewModel(),
 ) {
-    var messages = remember { mutableStateListOf<Message>().apply { addAll(initialMessages) } }
-    var inputText by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
 
     Column(
         modifier =
@@ -44,28 +41,15 @@ fun ChatScreen(
                     .fillMaxWidth(),
             contentPadding = PaddingValues(vertical = dimensionResource(R.dimen.padding_small)),
         ) {
-            itemsIndexed(items = messages, key = { _, msg -> msg.id }) { _, msg ->
+            itemsIndexed(uiState.messages, key = { _, msg -> msg.id }) { _, msg ->
                 MessageBubble(message = msg, isInGroup = isInGroup)
             }
         }
 
         ChatInput(
-            text = inputText,
-            onValueChange = { newValue -> inputText = newValue },
-            onClick = {
-                if (inputText.isNotBlank()) {
-                    val newMessage =
-                        Message(
-                            id = (messages.maxOfOrNull { it.id } ?: 0) + 1,
-                            user = "You",
-                            text = inputText,
-                            isOwn = true,
-                            timestamp = System.currentTimeMillis(),
-                        )
-                    messages.add(newMessage)
-                    inputText = ""
-                }
-            },
+            text = uiState.inputText,
+            onValueChange = viewModel::onInputChange,
+            onClick = viewModel::sendMessage,
             modifier =
                 Modifier
                     .fillMaxWidth()

@@ -1,56 +1,56 @@
 package com.citruschat.citrusmobile
 
+import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.citruschat.citrusmobile.domain.model.Message
 import com.citruschat.citrusmobile.ui.screen.ChatScreen
 import com.citruschat.citrusmobile.ui.theme.CitrusMobileTheme
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 
+private const val TAG = "MainActivity"
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate Called")
         enableEdgeToEdge()
         setContent {
             CitrusMobileTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    CitrusChat()
+                Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
+                    Surface(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(padding),
+                        color = MaterialTheme.colorScheme.background,
+                    ) {
+                        ChatScreen()
+                    }
                 }
             }
         }
     }
-}
 
-@Preview
-@Composable
-fun CitrusChatPreview() {
-    CitrusMobileTheme(darkTheme = false) {
-        CitrusChat()
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart Called")
     }
 }
 
-@Composable
-fun CitrusChat() {
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        val sample = createSampleMessages()
-
-        ChatScreen(
-            initialMessages = sample,
-            modifier = Modifier.padding(innerPadding),
-            isInGroup = true,
-        )
-    }
-}
+@HiltAndroidApp
+class CitrusChat : Application()
 
 private fun createSampleMessages(): List<Message> {
     val now = System.currentTimeMillis()
