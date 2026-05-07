@@ -1,4 +1,4 @@
-package com.citruschat.citrusmobile.ui.state
+package com.citruschat.citrusmobile.ui.chat
 
 import com.citruschat.citrusmobile.domain.model.Message
 

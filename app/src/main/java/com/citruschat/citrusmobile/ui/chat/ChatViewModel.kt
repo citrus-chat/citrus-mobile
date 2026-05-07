@@ -1,10 +1,9 @@
-package com.citruschat.citrusmobile.ui.viewmodel
+package com.citruschat.citrusmobile.ui.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.citruschat.citrusmobile.domain.model.Message
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
-import com.citruschat.citrusmobile.ui.state.ChatUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,7 +29,7 @@ class ChatViewModel
                 .observeMessages()
                 .stateIn(
                     scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5_000),
+                    started = SharingStarted.Companion.WhileSubscribed(5_000),
                     initialValue = emptyList(),
                 )
 
@@ -42,7 +41,7 @@ class ChatViewModel
                 )
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.Companion.WhileSubscribed(5_000),
                 initialValue = ChatUiState(isLoading = true),
             )
 

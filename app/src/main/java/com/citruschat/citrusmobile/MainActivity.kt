@@ -13,7 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.citruschat.citrusmobile.domain.model.Message
-import com.citruschat.citrusmobile.ui.screen.ChatScreen
+import com.citruschat.citrusmobile.navigation.AppNavHost
 import com.citruschat.citrusmobile.ui.theme.CitrusMobileTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(padding),
                         color = MaterialTheme.colorScheme.background,
                     ) {
-                        ChatScreen()
+                        AppNavHost()
                     }
                 }
             }
