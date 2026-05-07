@@ -1,4 +1,4 @@
-package com.citruschat.citrusmobile.ui.screen
+package com.citruschat.citrusmobile.ui.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -16,9 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.citruschat.citrusmobile.R
-import com.citruschat.citrusmobile.ui.component.ChatInput
-import com.citruschat.citrusmobile.ui.component.MessageBubble
-import com.citruschat.citrusmobile.ui.viewmodel.ChatViewModel
+import com.citruschat.citrusmobile.ui.chat.ChatViewModel
+import com.citruschat.citrusmobile.ui.chat.component.ChatInput
+import com.citruschat.citrusmobile.ui.chat.component.MessageBubble
 
 @Composable
 fun ChatScreen(
