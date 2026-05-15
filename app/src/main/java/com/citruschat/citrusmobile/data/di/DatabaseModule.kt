@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.citruschat.citrusmobile.data.local.dao.MessageDao
 import com.citruschat.citrusmobile.data.local.database.AppDatabase
-import com.citruschat.citrusmobile.data.repository.ChatRepositoryImpl
-import com.citruschat.citrusmobile.domain.repository.ChatRepository
+import com.citruschat.citrusmobile.data.repository.MessageRepositoryImpl
+import com.citruschat.citrusmobile.domain.repository.MessageRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,5 +34,5 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideChatRepository(dao: MessageDao): ChatRepository = ChatRepositoryImpl(dao)
+    fun provideChatRepository(dao: MessageDao): MessageRepository = MessageRepositoryImpl(dao)
 }

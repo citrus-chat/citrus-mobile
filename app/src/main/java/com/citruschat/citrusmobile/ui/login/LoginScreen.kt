@@ -18,9 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.citruschat.citrusmobile.R
 
 @Composable
 fun LoginScreen(
@@ -41,12 +42,12 @@ fun LoginScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .imePadding()
-                .padding(24.dp),
+                .padding(dimensionResource(R.dimen.padding_medium)),
         verticalArrangement = Arrangement.Center,
     ) {
         Text(text = "Login", style = MaterialTheme.typography.headlineMedium)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_large)))
 
         OutlinedTextField(
             value = uiState.username,
@@ -55,7 +56,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
 
         OutlinedTextField(
             value = uiState.password,
@@ -64,7 +65,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
 
         Button(
             onClick = { viewModel.login() },
@@ -75,7 +76,7 @@ fun LoginScreen(
         }
 
         uiState.errorMessage?.let {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
             Text(text = it, color = MaterialTheme.colorScheme.error)
         }
     }
