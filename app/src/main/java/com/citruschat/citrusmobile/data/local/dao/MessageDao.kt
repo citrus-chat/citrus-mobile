@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MessageDao {
-    @Query("SELECT * FROM messages ORDER BY timestamp ASC")
-    fun observeMessages(): Flow<List<MessageEntity>>
-
     @Insert
     suspend fun insert(message: MessageEntity)
+
+    @Query("SELECT * FROM messages WHERE chatId = :chatId ORDER BY timestamp ASC")
+    fun observeByChatId(chatId: Long): Flow<List<MessageEntity>>
 }
