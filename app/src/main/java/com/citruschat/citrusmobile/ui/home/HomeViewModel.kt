@@ -2,30 +2,43 @@ package com.citruschat.citrusmobile.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.citruschat.citrusmobile.domain.model.Chat
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.citruschat.citrusmobile.domain.repository.ChatRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-// to-do: Implement repository and inject it here
-class HomeViewModel : ViewModel() {
-    private val _uiState =
-        MutableStateFlow(
-            HomeUiState(
-                chats =
-                    listOf(
-                        Chat(id = 1, name = "Alice"),
-                        Chat(id = 2, name = "Study Group"),
-                        Chat(id = 3, name = "Bob"),
-                    ),
-            ),
-        )
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-
-    fun loadChats() {
-        viewModelScope.launch {
-            // replace with repository call
-        }
+@HiltViewModel
+class HomeViewModel
+    @Inject
+    constructor(
+        private val repository: ChatRepository,
+    ) : ViewModel() {
+        val uiState: StateFlow<HomeUiState> =
+            repository
+                .observeChatsItems()
+                .map { chats ->
+                    HomeUiState(
+                        chats = chats,
+                        isLoading = false,
+                        errorMessage = null,
+                    )
+                }.onStart { emit(HomeUiState(isLoading = true)) }
+                .catch { t ->
+                    emit(
+                        HomeUiState(
+                            chats = emptyList(),
+                            isLoading = false,
+                            errorMessage = t.message ?: "Failed to load chats",
+                        ),
+                    )
+                }.stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5_000),
+                    initialValue = HomeUiState(isLoading = true),
+                )
     }
-}

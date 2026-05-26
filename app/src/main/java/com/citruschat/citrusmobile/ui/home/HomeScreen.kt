@@ -19,14 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.citruschat.citrusmobile.R
-import com.citruschat.citrusmobile.domain.model.Chat
-import com.citruschat.citrusmobile.ui.home.component.ChatListItem
+import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
+import com.citruschat.citrusmobile.ui.home.component.ChatListItemComponent
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    onChatClick: (Chat) -> Unit = {},
+    onChatClick: (ChatListItemSummary) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -59,7 +59,7 @@ fun HomeScreen(
                     items = uiState.chats,
                     key = { _, chat -> chat.id },
                 ) { _, chat ->
-                    ChatListItem(
+                    ChatListItemComponent(
                         chat = chat,
                         onClick = { onChatClick(chat) },
                     )

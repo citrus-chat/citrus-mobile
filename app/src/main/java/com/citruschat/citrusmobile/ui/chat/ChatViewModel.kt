@@ -19,10 +19,9 @@ import javax.inject.Inject
 class ChatViewModel
     @Inject
     constructor(
-        repository: MessageRepository,
+        private val repository: MessageRepository,
         savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
-        private val repository = repository
         private val chatId: Long = checkNotNull(savedStateHandle["chatId"])
         private val _inputText = MutableStateFlow("")
         val inputText = _inputText.asStateFlow()
@@ -32,7 +31,7 @@ class ChatViewModel
                 .observeMessages(chatId)
                 .stateIn(
                     scope = viewModelScope,
-                    started = SharingStarted.Companion.WhileSubscribed(5_000),
+                    started = SharingStarted.WhileSubscribed(5_000),
                     initialValue = emptyList(),
                 )
 
@@ -44,7 +43,7 @@ class ChatViewModel
                 )
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Companion.WhileSubscribed(5_000),
+                started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = ChatUiState(isLoading = true),
             )
 
