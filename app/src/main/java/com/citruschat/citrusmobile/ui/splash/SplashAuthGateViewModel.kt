@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.citruschat.citrusmobile.domain.model.AuthState
 import com.citruschat.citrusmobile.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 @HiltViewModel
 class SplashAuthGateViewModel

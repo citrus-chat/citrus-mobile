@@ -4,13 +4,13 @@ import com.citruschat.citrusmobile.data.auth.AuthApiClient
 import com.citruschat.citrusmobile.data.auth.TokenStore
 import com.citruschat.citrusmobile.domain.model.AuthState
 import com.citruschat.citrusmobile.domain.repository.AuthRepository
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class AuthRepositoryImpl
     @Inject
