@@ -1,10 +1,13 @@
 package com.citruschat.citrusmobile.domain.repository
 
-import com.citruschat.citrusmobile.domain.model.Message
+import com.citruschat.citrusmobile.domain.model.Chat
+import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import kotlinx.coroutines.flow.Flow
 
 interface ChatRepository {
-    fun observeMessages(): Flow<List<Message>>
+    fun observeChatsItems(): Flow<List<ChatListItemSummary>>
 
-    suspend fun sendMessage(message: Message)
+    suspend fun createChat(chat: Chat)
+
+    suspend fun deleteChat(chatId: Long)
 }

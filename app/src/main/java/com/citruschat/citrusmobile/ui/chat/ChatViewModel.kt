@@ -1,9 +1,10 @@
 package com.citruschat.citrusmobile.ui.chat
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.citruschat.citrusmobile.domain.model.Message
-import com.citruschat.citrusmobile.domain.repository.ChatRepository
+import com.citruschat.citrusmobile.domain.repository.MessageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,18 +19,19 @@ import javax.inject.Inject
 class ChatViewModel
     @Inject
     constructor(
-        repository: ChatRepository,
+        private val repository: MessageRepository,
+        savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
-        private val repository = repository
+        private val chatId: Long = checkNotNull(savedStateHandle["chatId"])
         private val _inputText = MutableStateFlow("")
         val inputText = _inputText.asStateFlow()
 
         val messages: StateFlow<List<Message>> =
             repository
-                .observeMessages()
+                .observeMessages(chatId)
                 .stateIn(
                     scope = viewModelScope,
-                    started = SharingStarted.Companion.WhileSubscribed(5_000),
+                    started = SharingStarted.WhileSubscribed(5_000),
                     initialValue = emptyList(),
                 )
 
@@ -41,7 +43,7 @@ class ChatViewModel
                 )
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Companion.WhileSubscribed(5_000),
+                started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = ChatUiState(isLoading = true),
             )
 
@@ -61,6 +63,7 @@ class ChatViewModel
                         text = text,
                         isOwn = true,
                         timestamp = System.currentTimeMillis(),
+                        chatId = chatId,
                     )
                 repository.sendMessage(newMessage)
                 _inputText.value = ""

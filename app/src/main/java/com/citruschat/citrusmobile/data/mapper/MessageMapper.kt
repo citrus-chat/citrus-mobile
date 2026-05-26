@@ -10,6 +10,7 @@ fun MessageEntity.toDomain() =
         text = text,
         isOwn = isOwn,
         timestamp = timestamp,
+        chatId = chatId,
     )
 
 fun Message.toEntity() =
@@ -19,4 +20,5 @@ fun Message.toEntity() =
         text = text,
         isOwn = isOwn,
         timestamp = timestamp,
+        chatId = chatId,
     )
