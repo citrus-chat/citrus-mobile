@@ -25,7 +25,7 @@ class MessageRepositoryImpl
                 }
 
         override suspend fun sendMessage(message: Message) {
-            logger.i(TAG, "Persisting message for chatId=${message.chatId} text=${message.text}")
+            logger.i(TAG, "Persisting message for chatId=${message.chatId} textLength=${message.text.length}")
             runCatching {
                 dao.insert(message.toEntity())
             }.onFailure { throwable ->

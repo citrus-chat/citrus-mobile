@@ -27,15 +27,15 @@ class AuthRepositoryImpl
             password: String,
         ): AuthResult =
             withContext(ioDispatcher) {
-                logger.i(TAG, "Auth login started for username=$username")
+                logger.i(TAG, "Auth login started")
                 when (val result = authApiClient.login(username, password)) {
                     is AuthResult.Success -> {
                         tokenStore.saveTokens(result.tokens)
-                        logger.i(TAG, "Auth login succeeded for username=$username")
+                        logger.i(TAG, "Auth login succeeded")
                         result
                     }
                     is AuthResult.Error -> {
-                        logger.w(TAG, "Auth login failed for username=$username with ${result.error}")
+                        logger.w(TAG, "Auth login failed with ${result.error}")
                         result
                     }
                 }

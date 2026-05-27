@@ -74,7 +74,7 @@ class ChatViewModel
                         timestamp = System.currentTimeMillis(),
                         chatId = chatId,
                     )
-                logger.d(TAG, "Sending message to chatId=$chatId text=$text")
+                logger.d(TAG, "Sending message to chatId=$chatId textLength=${text.length}")
                 repository.sendMessage(newMessage)
                 _inputText.value = ""
                 logger.i(TAG, "Message sent to chatId=$chatId")

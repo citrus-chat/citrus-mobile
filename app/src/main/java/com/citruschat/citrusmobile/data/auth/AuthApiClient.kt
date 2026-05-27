@@ -34,7 +34,7 @@ class AuthApiClient
         ): AuthResult =
             withContext(Dispatchers.IO) {
                 try {
-                    logger.i(TAG, "Login request started for username=$username")
+                    logger.i(TAG, "Login request started")
                     val payload =
                         JSONObject()
                             .put("username", username)

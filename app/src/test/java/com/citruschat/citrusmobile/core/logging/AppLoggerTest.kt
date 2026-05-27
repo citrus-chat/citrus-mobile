@@ -26,6 +26,23 @@ class AppLoggerTest {
         assertEquals("Test", sink.entries.first().tag)
         assertEquals("boom", sink.entries.first().message)
     }
+
+    @Test
+    fun `logs all levels when enabled`() {
+        val sink = FakeLogSink()
+        val logger = AppLogger(isEnabled = true, logSink = sink)
+
+        logger.v(tag = "VerboseTag", message = "v")
+        logger.d(tag = "DebugTag", message = "d")
+        logger.i(tag = "InfoTag", message = "i")
+        logger.w(tag = "WarnTag", message = "w")
+
+        assertEquals(4, sink.entries.size)
+        assertEquals(LogLevel.VERBOSE, sink.entries[0].level)
+        assertEquals(LogLevel.DEBUG, sink.entries[1].level)
+        assertEquals(LogLevel.INFO, sink.entries[2].level)
+        assertEquals(LogLevel.WARN, sink.entries[3].level)
+    }
 }
 
 private class FakeLogSink : LogSink {

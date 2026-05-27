@@ -35,7 +35,7 @@ class LoginViewModel
 
         fun login() {
             val current = _uiState.value
-            logger.i(TAG, "Login requested for username=${current.username}")
+            logger.i(TAG, "Login requested")
 
             if (current.username.isBlank() || current.password.isBlank()) {
                 logger.w(TAG, "Login blocked due to blank credentials")
@@ -48,7 +48,7 @@ class LoginViewModel
 
                 when (val result = authRepository.login(current.username, current.password)) {
                     is AuthResult.Success -> {
-                        logger.i(TAG, "Login successful for username=${current.username}")
+                        logger.i(TAG, "Login successful")
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
@@ -60,7 +60,7 @@ class LoginViewModel
                     }
 
                     is AuthResult.Error -> {
-                        logger.w(TAG, "Login failed for username=${current.username} with ${result.error}")
+                        logger.w(TAG, "Login failed with ${result.error}")
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
@@ -71,7 +71,7 @@ class LoginViewModel
                     }
                 }
             }
-
-private const val TAG = "LoginViewModel"
         }
     }
+
+private const val TAG = "LoginViewModel"

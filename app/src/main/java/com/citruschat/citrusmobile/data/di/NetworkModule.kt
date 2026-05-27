@@ -1,7 +1,7 @@
 package com.citruschat.citrusmobile.data.di
 
-import com.citruschat.citrusmobile.BuildConfig
 import com.citruschat.citrusmobile.core.logging.Logger
+import com.citruschat.citrusmobile.core.logging.LoggingEnabled
 import com.citruschat.citrusmobile.data.remote.ws.OkHttpChatRealtimeClient
 import com.citruschat.citrusmobile.domain.realtime.ChatRealtimeClient
 import dagger.Binds
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 const val CONNECT_TIMEOUT = 10L
-const val READ_TIMEOUT = 0L // important for long-lived connections
+const val READ_TIMEOUT = 0L // no timeout for long-lived connections
 const val WRITE_TIMEOUT = 10L
 
 @Module
@@ -23,30 +23,29 @@ const val WRITE_TIMEOUT = 10L
 object NetworkModule {
     @Provides
     @Singleton
-    fun provideOkHttpClient(logger: Logger): OkHttpClient {
+    fun provideOkHttpClient(
+        logger: Logger,
+        @LoggingEnabled isLoggingEnabled: Boolean,
+    ): OkHttpClient {
         val logging =
-            HttpLoggingInterceptor().apply {
-                level = if (BuildConfig.ENABLE_APP_LOGGING) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
+            HttpLoggingInterceptor { message ->
+                logger.d(TAG, "HTTP $message")
+            }.apply {
+                level = if (isLoggingEnabled) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
             }
-        logger.i(TAG, "Creating OkHttpClient")
+        val builder =
+            OkHttpClient
+                .Builder()
+                .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS) // 0 means no timeout
+                .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .addInterceptor(logging)
 
-        return OkHttpClient
-            .Builder()
-            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
-            .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS) // important for long-lived connections
-            .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-            .addInterceptor { chain ->
-                val request = chain.request()
-                logger.d(TAG, "HTTP ${request.method} ${request.url} started")
-                runCatching { chain.proceed(request) }
-                    .onSuccess { response ->
-                        logger.i(TAG, "HTTP ${request.method} ${request.url} -> ${response.code}")
-                    }.onFailure { throwable ->
-                        logger.e(TAG, "HTTP ${request.method} ${request.url} failed", throwable)
-                    }.getOrThrow()
-            }
-            .addInterceptor(logging)
-            .build()
+        if (isLoggingEnabled) {
+            logger.i(TAG, "Creating OkHttpClient with request logging enabled")
+        }
+
+        return builder.build()
     }
 }
 
