@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">citrus-mobile</string>
-    <string name="chatInput_placeholder">Enter a message...</string>
+    <string name="chatInput_placeholder">Enter a message…</string>
+    <string name="auth_login_failed">Ha ocurrido un error… Intentelo de nuevo.</string>
+    <string name="auth_invalid_credentials">Usuario o contraseña incorrectos.</string>
+    <string name="auth_access_denied">No está autorizado a realizar esta acción.</string>
+    <string name="auth_network_error">Error de red.</string>
+    <string name="auth_username_password_required">Usuario y contraseña son necesarios.</string>
 </resources>

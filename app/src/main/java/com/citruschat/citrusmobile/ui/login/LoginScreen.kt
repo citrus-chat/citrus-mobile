@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.citruschat.citrusmobile.R
@@ -75,9 +76,9 @@ fun LoginScreen(
             Text(if (uiState.isLoading) "Loading..." else "Login")
         }
 
-        uiState.errorMessage?.let {
+        uiState.errorMessageRes?.let { resId ->
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
-            Text(text = it, color = MaterialTheme.colorScheme.error)
+            Text(text = stringResource(id = resId))
         }
     }
 }

@@ -21,6 +21,11 @@ fun AppNavHost() {
     ) {
         composable(Routes.Splash) {
             SplashAuthGateScreen(
+                onNavigateToHome = {
+                    navController.navigate(Routes.Home) {
+                        popUpTo(Routes.Splash) { inclusive = true }
+                    }
+                },
                 onNavigateToLogin = {
                     navController.navigate(Routes.Login) {
                         popUpTo(Routes.Splash) { inclusive = true }
