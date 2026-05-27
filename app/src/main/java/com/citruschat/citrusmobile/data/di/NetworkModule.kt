@@ -1,5 +1,7 @@
 package com.citruschat.citrusmobile.data.di
 
+import com.citruschat.citrusmobile.BuildConfig
+import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.remote.ws.OkHttpChatRealtimeClient
 import com.citruschat.citrusmobile.domain.realtime.ChatRealtimeClient
 import dagger.Binds
@@ -21,17 +23,28 @@ const val WRITE_TIMEOUT = 10L
 object NetworkModule {
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(logger: Logger): OkHttpClient {
         val logging =
             HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
+                level = if (BuildConfig.ENABLE_APP_LOGGING) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
             }
+        logger.i(TAG, "Creating OkHttpClient")
 
         return OkHttpClient
             .Builder()
             .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS) // important for long-lived connections
             .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request()
+                logger.d(TAG, "HTTP ${request.method} ${request.url} started")
+                runCatching { chain.proceed(request) }
+                    .onSuccess { response ->
+                        logger.i(TAG, "HTTP ${request.method} ${request.url} -> ${response.code}")
+                    }.onFailure { throwable ->
+                        logger.e(TAG, "HTTP ${request.method} ${request.url} failed", throwable)
+                    }.getOrThrow()
+            }
             .addInterceptor(logging)
             .build()
     }
@@ -44,3 +57,5 @@ abstract class RealtimeModule {
     @Singleton
     abstract fun bindChatRealtimeClient(impl: OkHttpChatRealtimeClient): ChatRealtimeClient
 }
+
+private const val TAG = "NetworkModule"

@@ -3,6 +3,7 @@ package com.citruschat.citrusmobile.ui.chat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.domain.model.Message
 import com.citruschat.citrusmobile.domain.repository.MessageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,7 @@ class ChatViewModel
     @Inject
     constructor(
         private val repository: MessageRepository,
+        private val logger: Logger,
         savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val chatId: Long = checkNotNull(savedStateHandle["chatId"])
@@ -47,13 +49,20 @@ class ChatViewModel
                 initialValue = ChatUiState(isLoading = true),
             )
 
+        init {
+            logger.i(TAG, "Opened chatId=$chatId")
+        }
+
         fun onInputChange(text: String) {
             _inputText.value = text
         }
 
         fun sendMessage() {
             val text = _inputText.value.trim()
-            if (text.isBlank()) return
+            if (text.isBlank()) {
+                logger.w(TAG, "Ignored empty message for chatId=$chatId")
+                return
+            }
 
             viewModelScope.launch {
                 val newMessage =
@@ -65,8 +74,12 @@ class ChatViewModel
                         timestamp = System.currentTimeMillis(),
                         chatId = chatId,
                     )
+                logger.d(TAG, "Sending message to chatId=$chatId text=$text")
                 repository.sendMessage(newMessage)
                 _inputText.value = ""
+                logger.i(TAG, "Message sent to chatId=$chatId")
             }
         }
     }
+
+private const val TAG = "ChatViewModel"

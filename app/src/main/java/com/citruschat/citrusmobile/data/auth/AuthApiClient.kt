@@ -1,5 +1,6 @@
 package com.citruschat.citrusmobile.data.auth
 
+import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.domain.auth.AuthError
 import com.citruschat.citrusmobile.domain.auth.AuthResult
 import kotlinx.coroutines.Dispatchers
@@ -18,9 +19,14 @@ class AuthApiClient
     @Inject
     constructor(
         private val okHttpClient: OkHttpClient,
+        private val logger: Logger,
         baseUrl: String,
     ) {
         private val loginUrl = "${baseUrl.trimEnd('/')}/auth/login"
+
+        init {
+            logger.i(TAG, "AuthApiClient initialized with baseUrl=${baseUrl.trimEnd('/')}")
+        }
 
         suspend fun login(
             username: String,
@@ -28,6 +34,7 @@ class AuthApiClient
         ): AuthResult =
             withContext(Dispatchers.IO) {
                 try {
+                    logger.i(TAG, "Login request started for username=$username")
                     val payload =
                         JSONObject()
                             .put("username", username)
@@ -46,6 +53,7 @@ class AuthApiClient
                         val body = response.body?.string().orEmpty()
 
                         if (!response.isSuccessful) {
+                            logger.w(TAG, "Login request failed with code=${response.code}")
                             return@withContext AuthResult.Error(
                                 AuthError.Http(
                                     code = response.code,
@@ -54,11 +62,14 @@ class AuthApiClient
                             )
                         }
 
+                        logger.i(TAG, "Login request succeeded")
                         AuthResult.Success(parseTokens(body))
                     }
-                } catch (_: IOException) {
+                } catch (t: IOException) {
+                    logger.e(TAG, "Login request network failure", t)
                     AuthResult.Error(AuthError.Network)
-                } catch (_: Exception) {
+                } catch (t: Exception) {
+                    logger.e(TAG, "Login request unknown failure", t)
                     AuthResult.Error(AuthError.Unknown)
                 }
             }
@@ -92,6 +103,7 @@ class AuthApiClient
 
         private companion object {
             val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
+            const val TAG = "AuthApiClient"
         }
     }
 

@@ -2,7 +2,6 @@ package com.citruschat.citrusmobile
 
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,19 +11,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.domain.model.Message
 import com.citruschat.citrusmobile.navigation.AppNavHost
 import com.citruschat.citrusmobile.ui.theme.CitrusMobileTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 private const val TAG = "MainActivity"
+private const val APP_TAG = "CitrusChatApp"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var logger: Logger
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate Called")
+        logger.i(TAG, "onCreate")
         enableEdgeToEdge()
         setContent {
             CitrusMobileTheme {
@@ -36,7 +41,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(padding),
                         color = MaterialTheme.colorScheme.background,
                     ) {
-                        AppNavHost()
+                        AppNavHost(logger = logger)
                     }
                 }
             }
@@ -45,12 +50,30 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        Log.d(TAG, "onStart Called")
+        logger.i(TAG, "onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        logger.v(TAG, "onResume")
+    }
+
+    override fun onStop() {
+        logger.v(TAG, "onStop")
+        super.onStop()
     }
 }
 
 @HiltAndroidApp
-class CitrusChat : Application()
+class CitrusChat : Application() {
+    @Inject
+    lateinit var logger: Logger
+
+    override fun onCreate() {
+        super.onCreate()
+        logger.i(APP_TAG, "Application initialized")
+    }
+}
 
 private fun createSampleMessages(): List<Message> {
     val now = System.currentTimeMillis()
