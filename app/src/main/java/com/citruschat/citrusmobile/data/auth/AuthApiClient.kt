@@ -25,7 +25,7 @@ class AuthApiClient
         private val loginUrl = "${baseUrl.trimEnd('/')}/auth/login"
 
         init {
-            logger.i(TAG, "AuthApiClient initialized with baseUrl=${baseUrl.trimEnd('/')}")
+            logger.i(TAG, "AuthApiClient initialized with URL: ${loginUrl}")
         }
 
         suspend fun login(
