@@ -9,6 +9,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import javax.inject.Inject
@@ -68,8 +69,8 @@ class AuthApiClient
                 } catch (t: IOException) {
                     logger.e(TAG, "Login request network failure", t)
                     AuthResult.Error(AuthError.Network)
-                } catch (t: Exception) {
-                    logger.e(TAG, "Login request unknown failure", t)
+                } catch (t: JSONException) {
+                    logger.e(TAG, "Login request parsing failure", t)
                     AuthResult.Error(AuthError.Unknown)
                 }
             }
