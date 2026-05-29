@@ -69,8 +69,8 @@ class AuthApiClient
                 } catch (t: IOException) {
                     logger.e(TAG, "Login request network failure", t)
                     AuthResult.Error(AuthError.Network)
-                } catch (t: JSONException) {
-                    logger.e(TAG, "Login request parsing failure", t)
+                } catch (t: Exception) {
+                    logger.e(TAG, "Login request unknown failure", t)
                     AuthResult.Error(AuthError.Unknown)
                 }
             }
