@@ -49,4 +49,6 @@
     <dimen name="divider_height">1dp</dimen>
     <dimen name="bottom_bar_height">56dp</dimen>
     <dimen name="top_bar_height">56dp</dimen>
+
+    <dimen name="navbar_height">56dp</dimen>
 </resources>

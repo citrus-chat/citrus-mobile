@@ -25,8 +25,8 @@ class LoginViewModel
         private val _uiState = MutableStateFlow(LoginUiState())
         val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-        fun onUsernameChange(username: String) {
-            _uiState.update { it.copy(username = username, errorMessage = null) }
+        fun onEmailChange(email: String) {
+            _uiState.update { it.copy(email = email, errorMessage = null) }
         }
 
         fun onPasswordChange(password: String) {
@@ -37,7 +37,7 @@ class LoginViewModel
             val current = _uiState.value
             logger.i(TAG, "Login requested")
 
-            if (current.username.isBlank() || current.password.isBlank()) {
+            if (current.email.isBlank() || current.password.isBlank()) {
                 logger.w(TAG, "Login blocked due to blank credentials")
                 _uiState.update { it.copy(errorMessageRes = R.string.auth_username_password_required) }
                 return
@@ -46,7 +46,7 @@ class LoginViewModel
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-                when (val result = authRepository.login(current.username, current.password)) {
+                when (val result = authRepository.login(current.email, current.password)) {
                     is AuthResult.Success -> {
                         logger.i(TAG, "Login successful")
                         _uiState.update {

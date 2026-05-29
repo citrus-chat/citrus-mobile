@@ -38,7 +38,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "API_BASE_URL", "\"https://api.citruschat.com/\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.9:8200/\"")
         buildConfigField("String", "WS_BASE_URL", "\"wss://api.citruschat.com/\"")
     }
 
@@ -48,7 +48,7 @@ android {
         }
         release {
             isMinifyEnabled = false
-            buildConfigField("Boolean", "ENABLE_APP_LOGGING", "false")
+            buildConfigField("Boolean", "ENABLE_APP_LOGGING", "true")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

@@ -26,7 +26,7 @@ class ChatRepositoryImpl
                 }
 
         override suspend fun createChat(chat: Chat) {
-            logger.i(TAG, "Creating chat id=${chat.id} title=${chat.title}")
+            logger.i(TAG, "Creating chat id=${chat.id} name=${chat.name}")
             runCatching {
                 dao.insert(chat.toEntity())
             }.onFailure { throwable ->

@@ -9,7 +9,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import javax.inject.Inject
@@ -23,10 +22,10 @@ class AuthApiClient
         private val logger: Logger,
         baseUrl: String,
     ) {
-        private val loginUrl = "${baseUrl.trimEnd('/')}/auth/login"
+        private val loginUrl = "${baseUrl.trimEnd('/')}/api/v1/auth/login"
 
         init {
-            logger.i(TAG, "AuthApiClient initialized with URL: ${loginUrl}")
+            logger.i(TAG, "AuthApiClient initialized with URL: $loginUrl")
         }
 
         suspend fun login(
@@ -36,9 +35,10 @@ class AuthApiClient
             withContext(Dispatchers.IO) {
                 try {
                     logger.i(TAG, "Login request started")
+
                     val payload =
                         JSONObject()
-                            .put("username", username)
+                            .put("email", username)
                             .put("password", password)
                             .toString()
                             .toRequestBody(JSON_MEDIA_TYPE)
@@ -77,23 +77,20 @@ class AuthApiClient
 
         private fun parseTokens(responseBody: String): AuthTokens {
             val json = JSONObject(responseBody)
+
             val accessToken =
-                json.optString("access_token").takeIf { it.isNotBlank() }
+                json.optString("data").takeIf { it.isNotBlank() }
                     ?: json.optString("accessToken").takeIf { it.isNotBlank() }
                     ?: throw AuthApiException("Missing access token")
-            val refreshToken =
-                json.optString("refresh_token").takeIf { it.isNotBlank() }
-                    ?: json.optString("refreshToken").takeIf { it.isNotBlank() }
-                    ?: throw AuthApiException("Missing refresh token")
 
             return AuthTokens(
                 accessToken = accessToken,
-                refreshToken = refreshToken,
             )
         }
 
         private fun parseErrorMessage(responseBody: String): String {
             if (responseBody.isBlank()) return "Login failed"
+
             return runCatching {
                 val json = JSONObject(responseBody)
                 json.optString("message").takeIf { it.isNotBlank() }

@@ -21,7 +21,7 @@ const val SPLASH_DELAY_MS = 2000L
 @Composable
 fun SplashAuthGateScreen(
     viewModel: SplashAuthGateViewModel = hiltViewModel(),
-    onNavigateToHome: () -> Unit,
+    onNavigateToMain: () -> Unit,
     onNavigateToLogin: () -> Unit,
 ) {
     val authState by viewModel.authState.collectAsStateWithLifecycle()
@@ -39,7 +39,7 @@ fun SplashAuthGateScreen(
         when (authState) {
             AuthState.Authenticated -> {
                 hasNavigated = true
-                onNavigateToHome()
+                onNavigateToMain()
             }
             AuthState.Unauthenticated -> {
                 hasNavigated = true

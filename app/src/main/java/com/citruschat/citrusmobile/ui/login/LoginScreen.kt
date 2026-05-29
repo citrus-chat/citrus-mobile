@@ -51,9 +51,9 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_large)))
 
         OutlinedTextField(
-            value = uiState.username,
-            onValueChange = viewModel::onUsernameChange,
-            label = { Text("Username") },
+            value = uiState.email,
+            onValueChange = viewModel::onEmailChange,
+            label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
         )
 
