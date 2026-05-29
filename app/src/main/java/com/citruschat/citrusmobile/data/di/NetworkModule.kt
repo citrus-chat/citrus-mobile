@@ -1,5 +1,7 @@
 package com.citruschat.citrusmobile.data.di
 
+import com.citruschat.citrusmobile.core.logging.Logger
+import com.citruschat.citrusmobile.core.logging.LoggingEnabled
 import com.citruschat.citrusmobile.data.remote.ws.OkHttpChatRealtimeClient
 import com.citruschat.citrusmobile.domain.realtime.ChatRealtimeClient
 import dagger.Binds
@@ -13,7 +15,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 const val CONNECT_TIMEOUT = 10L
-const val READ_TIMEOUT = 0L // important for long-lived connections
+const val READ_TIMEOUT = 0L // no timeout for long-lived connections
 const val WRITE_TIMEOUT = 10L
 
 @Module
@@ -21,19 +23,29 @@ const val WRITE_TIMEOUT = 10L
 object NetworkModule {
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(
+        logger: Logger,
+        @LoggingEnabled isLoggingEnabled: Boolean,
+    ): OkHttpClient {
         val logging =
-            HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
+            HttpLoggingInterceptor { message ->
+                logger.d(TAG, "HTTP $message")
+            }.apply {
+                level = if (isLoggingEnabled) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
             }
+        val builder =
+            OkHttpClient
+                .Builder()
+                .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS) // 0 means no timeout
+                .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .addInterceptor(logging)
 
-        return OkHttpClient
-            .Builder()
-            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
-            .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS) // important for long-lived connections
-            .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-            .addInterceptor(logging)
-            .build()
+        if (isLoggingEnabled) {
+            logger.i(TAG, "Creating OkHttpClient with request logging enabled")
+        }
+
+        return builder.build()
     }
 }
 
@@ -44,3 +56,5 @@ abstract class RealtimeModule {
     @Singleton
     abstract fun bindChatRealtimeClient(impl: OkHttpChatRealtimeClient): ChatRealtimeClient
 }
+
+private const val TAG = "NetworkModule"

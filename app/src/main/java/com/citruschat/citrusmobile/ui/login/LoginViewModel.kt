@@ -3,6 +3,7 @@ package com.citruschat.citrusmobile.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.citruschat.citrusmobile.R
+import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.mapper.toMessageRes
 import com.citruschat.citrusmobile.domain.auth.AuthResult
 import com.citruschat.citrusmobile.domain.repository.AuthRepository
@@ -19,6 +20,7 @@ class LoginViewModel
     @Inject
     constructor(
         private val authRepository: AuthRepository,
+        private val logger: Logger,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(LoginUiState())
         val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -33,8 +35,10 @@ class LoginViewModel
 
         fun login() {
             val current = _uiState.value
+            logger.i(TAG, "Login requested")
 
             if (current.username.isBlank() || current.password.isBlank()) {
+                logger.w(TAG, "Login blocked due to blank credentials")
                 _uiState.update { it.copy(errorMessageRes = R.string.auth_username_password_required) }
                 return
             }
@@ -44,6 +48,7 @@ class LoginViewModel
 
                 when (val result = authRepository.login(current.username, current.password)) {
                     is AuthResult.Success -> {
+                        logger.i(TAG, "Login successful")
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
@@ -55,6 +60,7 @@ class LoginViewModel
                     }
 
                     is AuthResult.Error -> {
+                        logger.w(TAG, "Login failed with ${result.error}")
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
@@ -67,3 +73,5 @@ class LoginViewModel
             }
         }
     }
+
+private const val TAG = "LoginViewModel"

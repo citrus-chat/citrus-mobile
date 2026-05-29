@@ -2,6 +2,7 @@ package com.citruschat.citrusmobile.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.local.dao.ChatDao
 import com.citruschat.citrusmobile.data.local.dao.MessageDao
 import com.citruschat.citrusmobile.data.local.database.AppDatabase
@@ -37,12 +38,18 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideMessageRepository(dao: MessageDao): MessageRepository = MessageRepositoryImpl(dao)
+    fun provideMessageRepository(
+        dao: MessageDao,
+        logger: Logger,
+    ): MessageRepository = MessageRepositoryImpl(dao, logger)
 
     @Provides
     fun provideChatDao(database: AppDatabase): ChatDao = database.chatDao()
 
     @Provides
     @Singleton
-    fun provideChatRepository(dao: ChatDao): ChatRepository = ChatRepositoryImpl(dao)
+    fun provideChatRepository(
+        dao: ChatDao,
+        logger: Logger,
+    ): ChatRepository = ChatRepositoryImpl(dao, logger)
 }

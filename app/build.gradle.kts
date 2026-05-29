@@ -43,8 +43,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("Boolean", "ENABLE_APP_LOGGING", "true")
+        }
         release {
             isMinifyEnabled = false
+            buildConfigField("Boolean", "ENABLE_APP_LOGGING", "false")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
