@@ -24,8 +24,7 @@ class SplashAuthGateViewModel
                 .observeAuthState()
                 .onEach { state ->
                     logger.i(TAG, "Auth gate observed state=$state")
-                }
-                .stateIn(
+                }.stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5000),
                     initialValue = AuthState.Loading,

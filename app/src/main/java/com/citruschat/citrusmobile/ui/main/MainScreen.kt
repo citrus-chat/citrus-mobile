@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     navController: NavHostController,
 ) {
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 2 })
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -51,10 +51,18 @@ fun MainScreen(
         ) { page ->
             when (page) {
                 0 ->
-                    HomeScreen(onChatClick = { chat ->
-                        navController.navigate(Routes.chat(chat.id))
+                    HomeScreen(onOpenChat = { chatId ->
+                        navController.navigate(Routes.chat(chatId))
                     })
-                1 -> ProfileScreen()
+                1 ->
+                    ProfileScreen(
+                        onLogoutComplete = {
+                            navController.navigate(Routes.Login) {
+                                popUpTo(Routes.Main) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                    )
             }
         }
     }

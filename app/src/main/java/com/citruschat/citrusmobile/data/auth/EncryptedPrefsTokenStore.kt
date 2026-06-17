@@ -10,6 +10,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.security.GeneralSecurityException
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -78,7 +79,10 @@ class EncryptedPrefsTokenStore
                 val accessToken = decrypt(cipherText, iv)
                 logger.v(TAG, "Persisted token loaded")
                 AuthTokens(accessToken = accessToken)
-            } catch (e: Exception) {
+            } catch (e: GeneralSecurityException) {
+                logger.e(TAG, "Failed to load persisted token", e)
+                null
+            } catch (e: IllegalArgumentException) {
                 logger.e(TAG, "Failed to load persisted token", e)
                 null
             }

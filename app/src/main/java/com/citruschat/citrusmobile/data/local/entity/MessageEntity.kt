@@ -1,18 +1,21 @@
 package com.citruschat.citrusmobile.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "messages",
     foreignKeys = [
-        androidx.room.ForeignKey(
+        ForeignKey(
             entity = ChatEntity::class,
             parentColumns = ["id"],
             childColumns = ["chatId"],
-            onDelete = androidx.room.ForeignKey.CASCADE,
+            onDelete = ForeignKey.CASCADE,
         ),
     ],
+    indices = [Index("chatId")],
 )
 data class MessageEntity(
     @PrimaryKey(autoGenerate = true)

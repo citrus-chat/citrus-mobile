@@ -2,6 +2,7 @@ package com.citruschat.citrusmobile.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -14,6 +15,7 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.SET_NULL,
         ),
     ],
+    indices = [Index("lastMessageId")],
 )
 data class ChatEntity(
     @PrimaryKey(autoGenerate = true)

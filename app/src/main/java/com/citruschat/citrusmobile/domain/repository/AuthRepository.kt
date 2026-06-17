@@ -1,7 +1,7 @@
 package com.citruschat.citrusmobile.domain.repository
 
-import com.citruschat.citrusmobile.domain.auth.AuthState
 import com.citruschat.citrusmobile.domain.auth.AuthResult
+import com.citruschat.citrusmobile.domain.auth.AuthState
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {

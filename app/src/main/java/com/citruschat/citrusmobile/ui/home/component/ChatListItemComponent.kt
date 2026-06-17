@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 
@@ -35,15 +36,31 @@ fun ChatListItemComponent(
             Text(
                 text = chat.name,
                 style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            if (chat.participantUsernames.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = chat.participantUsernames.joinToString(separator = ", ") { username -> "@$username" },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
 
-            Text(
-                text = "Chat ID: ${chat.id}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            chat.lastMessagePreview?.let { preview ->
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = preview,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
 }

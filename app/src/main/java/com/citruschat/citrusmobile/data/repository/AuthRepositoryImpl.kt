@@ -1,11 +1,13 @@
 package com.citruschat.citrusmobile.data.repository
 
+import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.auth.AuthApiClient
 import com.citruschat.citrusmobile.data.auth.TokenStore
-import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.domain.auth.AuthResult
 import com.citruschat.citrusmobile.domain.auth.AuthState
+import com.citruschat.citrusmobile.domain.model.User
 import com.citruschat.citrusmobile.domain.repository.AuthRepository
+import com.citruschat.citrusmobile.domain.repository.UserRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +21,7 @@ class AuthRepositoryImpl
     constructor(
         private val authApiClient: AuthApiClient,
         private val tokenStore: TokenStore,
+        private val userRepository: UserRepository,
         private val logger: Logger,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     ) : AuthRepository {
@@ -31,6 +34,7 @@ class AuthRepositoryImpl
                 when (val result = authApiClient.login(username, password)) {
                     is AuthResult.Success -> {
                         tokenStore.saveTokens(result.tokens)
+                        userRepository.saveCurrentUser(result.user ?: username.toFallbackUser())
                         logger.i(TAG, "Auth login succeeded")
                         result
                     }
@@ -45,6 +49,7 @@ class AuthRepositoryImpl
             withContext(ioDispatcher) {
                 logger.i(TAG, "Auth logout started")
                 tokenStore.clearTokens()
+                userRepository.clearCurrentUser()
                 logger.i(TAG, "Auth logout finished")
             }
         }
@@ -64,6 +69,15 @@ class AuthRepositoryImpl
                     logger.v(TAG, "Auth state observation started")
                     emit(AuthState.Loading)
                 }
+
+        private fun String.toFallbackUser(): User {
+            val email = trim()
+            return User(
+                id = email,
+                email = email,
+                username = email.substringBefore('@'),
+            )
+        }
     }
 
 private const val TAG = "AuthRepository"

@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.citruschat.citrusmobile.core.logging.Logger
-import com.citruschat.citrusmobile.domain.model.Message
+import com.citruschat.citrusmobile.domain.repository.ThemeRepository
 import com.citruschat.citrusmobile.navigation.AppNavHost
 import com.citruschat.citrusmobile.ui.theme.CitrusMobileTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,12 +29,17 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var logger: Logger
 
+    @Inject
+    lateinit var themeRepository: ThemeRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         logger.i(TAG, "onCreate")
         enableEdgeToEdge()
         setContent {
-            CitrusMobileTheme {
+            val isDarkTheme by themeRepository.observeDarkTheme().collectAsState(initial = false)
+
+            CitrusMobileTheme(darkTheme = isDarkTheme) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
                     Surface(
                         modifier =
@@ -73,54 +80,4 @@ class CitrusChat : Application() {
         super.onCreate()
         logger.i(APP_TAG, "Application initialized")
     }
-}
-
-private fun createSampleMessages(): List<Message> {
-    val now = System.currentTimeMillis()
-    val threeMinutes = 3 * 60 * 1000L
-
-    return listOf(
-        Message(
-            id = 1,
-            user = "Alice",
-            text = "Hey, are you coming to the meeting later?",
-            isOwn = false,
-            timestamp = now - (4 * threeMinutes),
-        ),
-        Message(
-            id = 2,
-            user = "You",
-            text = "Yeah — I'll be there in 10 minutes.",
-            isOwn = true,
-            timestamp = now - (3 * threeMinutes),
-        ),
-        Message(
-            id = 3,
-            user = "Alice",
-            text = "Great! Don't forget to bring the reports.",
-            isOwn = false,
-            timestamp = now - (2 * threeMinutes),
-        ),
-        Message(
-            id = 4,
-            user = "You",
-            text = "On it. See you soon.",
-            isOwn = true,
-            timestamp = now - threeMinutes,
-        ),
-        Message(
-            id = 5,
-            user = "Bob",
-            text = "If anyone needs the agenda, I uploaded it to the drive.",
-            isOwn = false,
-            timestamp = now,
-        ),
-        Message(
-            id = 6,
-            user = "Crazy 8",
-            text = "WHAT ARE YOU SAYING, BOB? I CAN'T HEAR YOU OVER THE SOUND OF MY OWN VOICE!",
-            isOwn = false,
-            timestamp = now,
-        ),
-    )
 }

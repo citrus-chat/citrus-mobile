@@ -5,9 +5,11 @@ import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import kotlinx.coroutines.flow.Flow
 
 interface ChatRepository {
-    fun observeChatsItems(): Flow<List<ChatListItemSummary>>
+    fun observeChatsItems(searchQuery: String = ""): Flow<List<ChatListItemSummary>>
 
-    suspend fun createChat(chat: Chat)
+    suspend fun findDirectChatId(participantUserIds: List<String>): Long?
+
+    suspend fun createChat(chat: Chat): Long
 
     suspend fun deleteChat(chatId: Long)
 }

@@ -1,34 +1,48 @@
 package com.citruschat.citrusmobile.ui.profile
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.citruschat.citrusmobile.ui.profile.component.ProfileHeader
+import com.citruschat.citrusmobile.ui.profile.component.ProfileOptions
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    onLogoutComplete: () -> Unit,
+    viewModel: ProfileViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.isLoggedOut) {
+        if (uiState.isLoggedOut) onLogoutComplete()
+    }
+
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp, vertical = 24.dp),
     ) {
-        Text(
-            text = "Profile",
-            style = MaterialTheme.typography.headlineMedium,
-        )
+        ProfileHeader(user = uiState.user)
 
-        Text(
-            text = "This is the profile screen example.",
-            modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
+        Spacer(modifier = Modifier.weight(1f))
+
+        ProfileOptions(
+            isDarkTheme = uiState.isDarkTheme,
+            isLoggingOut = uiState.isLoggingOut,
+            onDarkThemeChange = viewModel::setDarkTheme,
+            onLogoutClick = viewModel::logout,
         )
     }
 }
