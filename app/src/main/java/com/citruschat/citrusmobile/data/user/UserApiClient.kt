@@ -54,6 +54,9 @@ class UserApiClient
 
                         UserApiResponseParser.parseUsers(body).also { users ->
                             logger.d(TAG, "User search returned count=${users.size}")
+                            users.forEach { user ->
+                                logger.d(TAG, user.toString())
+                            }
                         }
                     }
                 } catch (t: IOException) {

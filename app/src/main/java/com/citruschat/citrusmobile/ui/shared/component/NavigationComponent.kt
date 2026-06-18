@@ -12,11 +12,9 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults.windowInsets
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.citruschat.citrusmobile.R
 import com.citruschat.citrusmobile.navigation.Routes
@@ -45,12 +43,6 @@ fun NavigationComponent(
                     contentDescription = null,
                 )
             },
-            label = {
-                Text(
-                    text = "Chats",
-                    fontWeight = if (currentRoute == Routes.Home) FontWeight.SemiBold else FontWeight.Normal,
-                )
-            },
             colors =
                 NavigationBarItemDefaults.colors(
                     selectedIconColor = selectedColor,
@@ -68,12 +60,6 @@ fun NavigationComponent(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Chat,
                     contentDescription = null,
-                )
-            },
-            label = {
-                Text(
-                    text = "Profile",
-                    fontWeight = if (currentRoute == Routes.Profile) FontWeight.SemiBold else FontWeight.Normal,
                 )
             },
             colors =

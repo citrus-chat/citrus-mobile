@@ -3,7 +3,6 @@ package com.citruschat.citrusmobile.data.auth
 import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.domain.auth.AuthError
 import com.citruschat.citrusmobile.domain.auth.AuthResult
-import com.citruschat.citrusmobile.domain.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -23,14 +22,14 @@ class AuthApiClient
         private val okHttpClient: OkHttpClient,
         private val logger: Logger,
         baseUrl: String,
-    ) {
+    ) : AuthRemoteDataSource {
         private val loginUrl = "${baseUrl.trimEnd('/')}/api/v1/auth/login"
 
         init {
             logger.i(TAG, "AuthApiClient initialized with URL: $loginUrl")
         }
 
-        suspend fun login(
+        override suspend fun login(
             username: String,
             password: String,
         ): AuthResult =
@@ -60,13 +59,14 @@ class AuthApiClient
                             return@withContext AuthResult.Error(
                                 AuthError.Http(
                                     code = response.code,
-                                    message = parseErrorMessage(body).ifBlank { null },
+                                    message = AuthApiResponseParser.parseErrorMessage(body).ifBlank { null },
                                 ),
                             )
                         }
 
                         logger.i(TAG, "Login request succeeded")
-                        val parsed = parseLoginResponse(body)
+                        val parsed = AuthApiResponseParser.parseLoginResponse(body)
+                        logger.d(TAG, parsed.toString())
                         AuthResult.Success(
                             tokens = parsed.tokens,
                             user = parsed.user,
@@ -81,90 +81,8 @@ class AuthApiClient
                 }
             }
 
-        private fun parseLoginResponse(responseBody: String): ParsedLoginResponse {
-            val json = JSONObject(responseBody)
-            val dataObject = json.optJSONObject("data")
-
-            return ParsedLoginResponse(
-                tokens = AuthTokens(accessToken = json.accessTokenFrom(dataObject)),
-                user = json.userObjectFrom(dataObject)?.toUser(),
-            )
-        }
-
-        private fun JSONObject.userObjectFrom(dataObject: JSONObject?): JSONObject? =
-            dataObject?.optJSONObject("user")
-                ?: dataObject?.optJSONObject("currentUser")
-                ?: dataObject?.takeIf { it.hasEmail() }
-                ?: optJSONObject("user")
-                ?: optJSONObject("currentUser")
-                ?: takeIf { it.hasEmail() }
-
-        private fun JSONObject.accessTokenFrom(dataObject: JSONObject?): String =
-            when {
-                optString("data").isNotBlank() && dataObject == null -> optString("data")
-                else ->
-                    dataObject?.stringOrNull("accessToken")
-                        ?: dataObject?.stringOrNull("token")
-                        ?: stringOrNull("accessToken")
-                        ?: stringOrNull("token")
-                        ?: throw AuthApiException("Missing access token")
-            }
-
-        private fun JSONObject.hasEmail(): Boolean = has("email") || has("mail")
-
-        private fun JSONObject.toUser(): User? {
-            val email = stringOrNull("email") ?: stringOrNull("mail") ?: return null
-            val id =
-                stringOrNull("id")
-                    ?: stringOrNull("userId")
-                    ?: stringOrNull("_id")
-                    ?: email
-
-            return User(
-                id = id,
-                email = email,
-                username =
-                    stringOrNull("username")
-                        ?: stringOrNull("name")
-                        ?: email.substringBefore('@'),
-                profilePictureUrl =
-                    stringOrNull("profilePictureUrl")
-                        ?: stringOrNull("profilePicture")
-                        ?: stringOrNull("avatarUrl"),
-                statusMessage =
-                    stringOrNull("statusMessage")
-                        ?: stringOrNull("status")
-                        ?: stringOrNull("bio"),
-                createdAt = stringOrNull("createdAt").orEmpty(),
-            )
-        }
-
-        private fun JSONObject.stringOrNull(name: String): String? =
-            optString(name)
-                .takeIf { it.isNotBlank() && it != "null" }
-
-        private fun parseErrorMessage(responseBody: String): String {
-            if (responseBody.isBlank()) return "Login failed"
-
-            return runCatching {
-                val json = JSONObject(responseBody)
-                json.optString("message").takeIf { it.isNotBlank() }
-                    ?: json.optString("error").takeIf { it.isNotBlank() }
-                    ?: "Login failed"
-            }.getOrDefault("Login failed")
-        }
-
-        private data class ParsedLoginResponse(
-            val tokens: AuthTokens,
-            val user: User?,
-        )
-
         private companion object {
             val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
             const val TAG = "AuthApiClient"
         }
     }
-
-class AuthApiException(
-    message: String,
-) : IOException(message)

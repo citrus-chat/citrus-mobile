@@ -1,7 +1,7 @@
 package com.citruschat.citrusmobile.data.repository
 
 import com.citruschat.citrusmobile.core.logging.Logger
-import com.citruschat.citrusmobile.data.auth.AuthApiClient
+import com.citruschat.citrusmobile.data.auth.AuthRemoteDataSource
 import com.citruschat.citrusmobile.data.auth.TokenStore
 import com.citruschat.citrusmobile.domain.auth.AuthResult
 import com.citruschat.citrusmobile.domain.auth.AuthState
@@ -19,7 +19,7 @@ import javax.inject.Inject
 class AuthRepositoryImpl
     @Inject
     constructor(
-        private val authApiClient: AuthApiClient,
+        private val authRemoteDataSource: AuthRemoteDataSource,
         private val tokenStore: TokenStore,
         private val userRepository: UserRepository,
         private val logger: Logger,
@@ -31,7 +31,7 @@ class AuthRepositoryImpl
         ): AuthResult =
             withContext(ioDispatcher) {
                 logger.i(TAG, "Auth login started")
-                when (val result = authApiClient.login(username, password)) {
+                when (val result = authRemoteDataSource.login(username, password)) {
                     is AuthResult.Success -> {
                         tokenStore.saveTokens(result.tokens)
                         userRepository.saveCurrentUser(result.user ?: username.toFallbackUser())

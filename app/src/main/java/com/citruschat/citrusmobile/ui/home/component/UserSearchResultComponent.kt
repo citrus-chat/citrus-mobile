@@ -2,9 +2,7 @@ package com.citruschat.citrusmobile.ui.home.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -12,7 +10,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,7 +40,7 @@ fun UserSearchResultComponent(
             },
             headlineContent = {
                 Text(
-                    text = user.username.ifBlank { user.id },
+                    text = user.username,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -57,12 +54,6 @@ fun UserSearchResultComponent(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Start chat",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
                 }
             },
         )
