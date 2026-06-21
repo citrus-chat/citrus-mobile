@@ -43,3 +43,8 @@ Remote user search is handled by `UserApiClient`, which calls `GET /api/v1/users
 
 When parsing remote responses, keep parsing helpers small and deterministic. Prefer explicit exception handling over broad `Exception` catches so detekt stays meaningful.
 
+## Best practices
+
+Instead of using hardcoded strings, colors and sizes. Use resources.
+
+You have resources from strings.xml or color.xml and also MaterialTheme resources. This app uses a custom MaterialTheme with custom sizes, colors and more.
