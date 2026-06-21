@@ -44,9 +44,30 @@ interface ChatDao {
     @Transaction
     @Query(
         """
-        SELECT DISTINCT chats.*
+        SELECT DISTINCT
+            chats.id,
+            chats.name,
+            COALESCE(
+                chats.lastMessageId,
+                (
+                    SELECT latest_messages.id
+                    FROM messages AS latest_messages
+                    WHERE latest_messages.chatId = chats.id
+                    ORDER BY latest_messages.timestamp DESC, latest_messages.id DESC
+                    LIMIT 1
+                )
+            ) AS lastMessageId
         FROM chats
-        LEFT JOIN messages ON messages.id = chats.lastMessageId
+        LEFT JOIN messages ON messages.id = COALESCE(
+            chats.lastMessageId,
+            (
+                SELECT latest_messages.id
+                FROM messages AS latest_messages
+                WHERE latest_messages.chatId = chats.id
+                ORDER BY latest_messages.timestamp DESC, latest_messages.id DESC
+                LIMIT 1
+            )
+        )
         LEFT JOIN chat_participants ON chat_participants.chatId = chats.id
         LEFT JOIN users ON users.id = chat_participants.userId
         WHERE :searchQuery = ''

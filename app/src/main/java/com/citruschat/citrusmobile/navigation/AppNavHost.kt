@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.ui.chat.ChatScreen
+import com.citruschat.citrusmobile.ui.devices.ConnectedDevicesScreen
+import com.citruschat.citrusmobile.ui.devices.DeviceQrScannerScreen
 import com.citruschat.citrusmobile.ui.login.LoginScreen
 import com.citruschat.citrusmobile.ui.main.MainScreen
 import com.citruschat.citrusmobile.ui.splash.SplashAuthGateScreen
@@ -53,6 +55,22 @@ fun AppNavHost(logger: Logger) {
 
         composable(Routes.Main) {
             MainScreen(navController)
+        }
+
+        composable(Routes.ConnectedDevices) {
+            ConnectedDevicesScreen(
+                onOpenQrScanner = {
+                    navController.navigate(Routes.DeviceQrScanner)
+                },
+            )
+        }
+
+        composable(Routes.DeviceQrScanner) {
+            DeviceQrScannerScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+            )
         }
 
         composable(

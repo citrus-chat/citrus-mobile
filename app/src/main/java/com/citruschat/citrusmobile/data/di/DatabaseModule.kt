@@ -38,7 +38,7 @@ object DatabaseModule {
                 context,
                 AppDatabase::class.java,
                 "citrus.db",
-            ).addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+            ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
 
     @Provides
@@ -114,5 +114,12 @@ private val MIGRATION_3_4 =
             db.execSQL("CREATE INDEX IF NOT EXISTS index_messages_chatId ON messages(chatId)")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_chat_participants_chatId ON chat_participants(chatId)")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_chat_participants_userId ON chat_participants(userId)")
+        }
+    }
+
+private val MIGRATION_4_5 =
+    object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE messages ADD COLUMN deliveryStatus TEXT NOT NULL DEFAULT 'SENT'")
         }
     }

@@ -7,6 +7,7 @@ import com.citruschat.citrusmobile.data.local.entity.MessageEntity
 import com.citruschat.citrusmobile.data.local.entity.UserEntity
 import com.citruschat.citrusmobile.domain.model.Chat
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
+import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -65,6 +66,7 @@ class ChatMapperTest {
                         isOwn = false,
                         timestamp = 1_700_000_000,
                         chatId = 3,
+                        deliveryStatus = "VIEWED",
                     ),
                 participants =
                     listOf(
@@ -72,6 +74,7 @@ class ChatMapperTest {
                             id = "user-1",
                             email = "ada@example.com",
                             username = "ada",
+                            profilePictureUrl = "https://example.com/ada.png",
                         ),
                         UserEntity(
                             id = "user-2",
@@ -90,6 +93,8 @@ class ChatMapperTest {
                 lastMessagePreview = "See you soon",
                 participantUserIds = listOf("user-1", "user-2"),
                 participantUsernames = listOf("ada", "grace"),
+                participantAvatarUrls = listOf("https://example.com/ada.png", null),
+                lastMessageStatus = MessageDeliveryStatus.VIEWED,
             ),
             summary,
         )

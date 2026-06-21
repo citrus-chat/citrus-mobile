@@ -3,6 +3,7 @@ package com.citruschat.citrusmobile.data.repository
 import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.auth.AuthRemoteDataSource
 import com.citruschat.citrusmobile.data.auth.TokenStore
+import com.citruschat.citrusmobile.data.device.DeviceIdentityProvider
 import com.citruschat.citrusmobile.domain.auth.AuthResult
 import com.citruschat.citrusmobile.domain.auth.AuthState
 import com.citruschat.citrusmobile.domain.model.User
@@ -21,6 +22,7 @@ class AuthRepositoryImpl
     constructor(
         private val authRemoteDataSource: AuthRemoteDataSource,
         private val tokenStore: TokenStore,
+        private val deviceIdentityProvider: DeviceIdentityProvider,
         private val userRepository: UserRepository,
         private val logger: Logger,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -31,7 +33,9 @@ class AuthRepositoryImpl
         ): AuthResult =
             withContext(ioDispatcher) {
                 logger.i(TAG, "Auth login started")
-                when (val result = authRemoteDataSource.login(username, password)) {
+                val deviceIdentity = deviceIdentityProvider.getOrCreateDeviceIdentity()
+
+                when (val result = authRemoteDataSource.login(username, password, deviceIdentity)) {
                     is AuthResult.Success -> {
                         tokenStore.saveTokens(result.tokens)
                         userRepository.saveCurrentUser(result.user ?: username.toFallbackUser())
@@ -49,6 +53,7 @@ class AuthRepositoryImpl
             withContext(ioDispatcher) {
                 logger.i(TAG, "Auth logout started")
                 tokenStore.clearTokens()
+                deviceIdentityProvider.clearDeviceIdentity()
                 userRepository.clearCurrentUser()
                 logger.i(TAG, "Auth logout finished")
             }

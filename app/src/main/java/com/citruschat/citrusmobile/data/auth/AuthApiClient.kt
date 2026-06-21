@@ -1,6 +1,7 @@
 package com.citruschat.citrusmobile.data.auth
 
 import com.citruschat.citrusmobile.core.logging.Logger
+import com.citruschat.citrusmobile.data.device.DeviceIdentity
 import com.citruschat.citrusmobile.domain.auth.AuthError
 import com.citruschat.citrusmobile.domain.auth.AuthResult
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ class AuthApiClient
         override suspend fun login(
             username: String,
             password: String,
+            deviceIdentity: DeviceIdentity,
         ): AuthResult =
             withContext(Dispatchers.IO) {
                 try {
@@ -41,6 +43,7 @@ class AuthApiClient
                         JSONObject()
                             .put("email", username)
                             .put("password", password)
+                            .put("deviceRequest", deviceIdentity.toJson())
                             .toString()
                             .toRequestBody(JSON_MEDIA_TYPE)
 
@@ -80,6 +83,13 @@ class AuthApiClient
                     AuthResult.Error(AuthError.Unknown)
                 }
             }
+
+        private fun DeviceIdentity.toJson(): JSONObject =
+            JSONObject()
+                .put("deviceId", deviceId)
+                .put("deviceName", deviceName)
+                .put("deviceType", deviceType)
+                .put("publicKey", publicKey)
 
         private companion object {
             val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()

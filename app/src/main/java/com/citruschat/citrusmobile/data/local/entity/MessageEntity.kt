@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 
 @Entity(
     tableName = "messages",
@@ -25,4 +26,5 @@ data class MessageEntity(
     val isOwn: Boolean,
     val timestamp: Long,
     val chatId: Long,
+    val deliveryStatus: String = MessageDeliveryStatus.SENT.toString(),
 )

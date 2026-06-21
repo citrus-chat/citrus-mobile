@@ -6,4 +6,17 @@
     <string name="auth_access_denied">No está autorizado a realizar esta acción.</string>
     <string name="auth_network_error">Error de red.</string>
     <string name="auth_username_password_required">Usuario y contraseña son necesarios.</string>
+    <string name="profile_dark_mode">Dark mode</string>
+    <string name="profile_other_devices">Otros dispositivos...</string>
+    <string name="profile_logging_out">Cerrando sesión...</string>
+    <string name="profile_log_out">Cerrar sesión</string>
+    <string name="connected_devices_title">Dispositivos conectados</string>
+    <string name="connected_devices_add_content_description">Agregar dispositivo</string>
+    <string name="connected_devices_empty">No hay dispositivos conectados</string>
+    <string name="connected_device_summary">%1$s - %2$s</string>
+    <string name="device_qr_scanner_back_content_description">Volver</string>
+    <string name="device_qr_scanner_title">Vincular nuevo dispositivo</string>
+    <string name="device_qr_scanner_hint">Abre Citrus Chat en la web para escanear el código QR.</string>
+    <string name="device_qr_scanner_permission_required">Permisos de cámara son necesarios para escanear el QR.</string>
+    <string name="device_qr_scanner_phone_number_action">Linkear con número de teléfono</string>
 </resources>

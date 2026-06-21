@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -51,7 +50,6 @@ fun HomeScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .imePadding()
                 .padding(dimensionResource(R.dimen.padding_medium)),
         verticalArrangement = Arrangement.Top,
     ) {
@@ -105,7 +103,7 @@ fun HomeScreen(
             )
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(bottom = dimensionResource(R.dimen.padding_medium)),
             ) {
                 if (uiState.chats.isNotEmpty()) {

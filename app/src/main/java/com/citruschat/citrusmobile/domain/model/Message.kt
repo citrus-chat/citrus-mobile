@@ -7,4 +7,5 @@ data class Message(
     val timestamp: Long,
     val isOwn: Boolean = false,
     val chatId: Long = 0,
+    val deliveryStatus: MessageDeliveryStatus = MessageDeliveryStatus.SENT,
 )

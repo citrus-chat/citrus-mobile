@@ -6,4 +6,7 @@ data class ChatListItemSummary(
     val lastMessagePreview: String?,
     val participantUserIds: List<String> = emptyList(),
     val participantUsernames: List<String> = emptyList(),
+    val participantAvatarUrls: List<String?> = emptyList(),
+    val lastMessageStatus: MessageDeliveryStatus? = null,
+    val activityText: String? = null,
 )

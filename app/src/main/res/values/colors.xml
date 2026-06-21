@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="scanner_chrome">#FF071013</color>
+    <color name="scanner_background">#FF151D1F</color>
+    <color name="scanner_muted_text">#FF9AA5A9</color>
+    <color name="scanner_scrim">#6610181A</color>
+    <color name="scanner_window_tint">#4DE1D8C8</color>
+    <color name="scanner_frame_stroke">#99F0E8DA</color>
 </resources>

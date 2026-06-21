@@ -19,6 +19,7 @@ import com.citruschat.citrusmobile.ui.profile.component.ProfileOptions
 @Composable
 fun ProfileScreen(
     onLogoutComplete: () -> Unit,
+    onConnectedDevicesClick: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -42,6 +43,7 @@ fun ProfileScreen(
             isDarkTheme = uiState.isDarkTheme,
             isLoggingOut = uiState.isLoggingOut,
             onDarkThemeChange = viewModel::setDarkTheme,
+            onConnectedDevicesClick = onConnectedDevicesClick,
             onLogoutClick = viewModel::logout,
         )
     }

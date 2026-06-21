@@ -25,10 +25,15 @@ object UserApiResponseParser {
             id = requiredString("id"),
             email = requiredString("email"),
             username = requiredString("username"),
+            profilePictureUrl = optionalString("avatar_url"),
         )
 
     private fun JSONObject.requiredString(name: String): String =
         optString(name)
             .takeIf { it.isNotBlank() && it != "null" }
             ?: throw JSONException("Missing $name")
+
+    private fun JSONObject.optionalString(name: String): String? =
+        optString(name)
+            .takeIf { it.isNotBlank() && it != "null" }
 }

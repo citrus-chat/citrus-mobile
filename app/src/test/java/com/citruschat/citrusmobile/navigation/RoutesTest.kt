@@ -13,4 +13,14 @@ class RoutesTest {
     fun `builds concrete chat route from id`() {
         assertEquals("chat/42", Routes.chat(42))
     }
+
+    @Test
+    fun `connected devices route is registered`() {
+        assertEquals("connected-devices", Routes.ConnectedDevices)
+    }
+
+    @Test
+    fun `device qr scanner route is registered`() {
+        assertEquals("device-qr-scanner", Routes.DeviceQrScanner)
+    }
 }

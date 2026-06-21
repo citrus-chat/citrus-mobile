@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -20,13 +22,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.citruschat.citrusmobile.R
 
 @Composable
 fun ProfileOptions(
     isDarkTheme: Boolean,
     isLoggingOut: Boolean,
     onDarkThemeChange: (Boolean) -> Unit,
+    onConnectedDevicesClick: () -> Unit,
     onLogoutClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -48,7 +53,7 @@ fun ProfileOptions(
                 )
                 Spacer(modifier = Modifier.width(14.dp))
                 Text(
-                    text = "Dark mode",
+                    text = stringResource(R.string.profile_dark_mode),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
@@ -58,6 +63,20 @@ fun ProfileOptions(
                 onCheckedChange = onDarkThemeChange,
             )
         }
+
+        OutlinedButton(
+            onClick = onConnectedDevicesClick,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Devices,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(R.string.profile_other_devices))
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedButton(
             onClick = onLogoutClick,
@@ -73,7 +92,14 @@ fun ProfileOptions(
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = if (isLoggingOut) "Logging out" else "Log out")
+            Text(
+                text =
+                    if (isLoggingOut) {
+                        stringResource(R.string.profile_logging_out)
+                    } else {
+                        stringResource(R.string.profile_log_out)
+                    },
+            )
         }
     }
 }

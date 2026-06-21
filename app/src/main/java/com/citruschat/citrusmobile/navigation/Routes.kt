@@ -9,6 +9,8 @@ object Routes {
     const val Chat = "chat/{chatId}"
 
     const val Profile = "profile"
+    const val ConnectedDevices = "connected-devices"
+    const val DeviceQrScanner = "device-qr-scanner"
 
     fun chat(chatId: Long) = "chat/$chatId"
 }

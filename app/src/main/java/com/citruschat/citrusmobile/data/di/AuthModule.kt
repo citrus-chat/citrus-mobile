@@ -6,6 +6,8 @@ import com.citruschat.citrusmobile.data.auth.AuthApiClient
 import com.citruschat.citrusmobile.data.auth.AuthRemoteDataSource
 import com.citruschat.citrusmobile.data.auth.EncryptedPrefsTokenStore
 import com.citruschat.citrusmobile.data.auth.TokenStore
+import com.citruschat.citrusmobile.data.device.DeviceIdentityProvider
+import com.citruschat.citrusmobile.data.device.EncryptedPrefsDeviceIdentityProvider
 import com.citruschat.citrusmobile.data.repository.AuthRepositoryImpl
 import com.citruschat.citrusmobile.data.user.UserApiClient
 import com.citruschat.citrusmobile.data.user.UserRemoteDataSource
@@ -43,6 +45,12 @@ object AuthModule {
 
     @Provides
     @Singleton
+    fun provideDeviceIdentityProvider(
+        provider: EncryptedPrefsDeviceIdentityProvider,
+    ): DeviceIdentityProvider = provider
+
+    @Provides
+    @Singleton
     fun provideUserApiClient(
         okHttpClient: OkHttpClient,
         tokenStore: TokenStore,
@@ -64,12 +72,14 @@ object AuthModule {
     fun provideAuthRepository(
         authRemoteDataSource: AuthRemoteDataSource,
         tokenStore: TokenStore,
+        deviceIdentityProvider: DeviceIdentityProvider,
         userRepository: UserRepository,
         logger: Logger,
     ): AuthRepository =
         AuthRepositoryImpl(
             authRemoteDataSource = authRemoteDataSource,
             tokenStore = tokenStore,
+            deviceIdentityProvider = deviceIdentityProvider,
             userRepository = userRepository,
             logger = logger,
         )

@@ -62,6 +62,9 @@ fun MainScreen(
                                 launchSingleTop = true
                             }
                         },
+                        onConnectedDevicesClick = {
+                            navController.navigate(Routes.ConnectedDevices)
+                        },
                     )
             }
         }
