@@ -19,4 +19,15 @@
     <string name="device_qr_scanner_hint">Abre Citrus Chat en la web para escanear el código QR.</string>
     <string name="device_qr_scanner_permission_required">Permisos de cámara son necesarios para escanear el QR.</string>
     <string name="device_qr_scanner_phone_number_action">Linkear con número de teléfono</string>
+    <string name="chats_search_placeholder">Busca chats o usuarios</string>
+    <string name="chats_search_clear">Limpiar búsqueda</string>
+    <string name="chats_search_empty">Nada encontrado por aquí...</string>
+    <string name="chats_search_users_title">Usuarios</string>
+    <string name="chats_search_chats_title">Chats</string>
+    <string name="profile_unknown_user">Usuario desconocido</string>
+    <string name="profile_unknown_email">Email desconocido</string>
+    <string name="profile_blank_created_at">No sabemos :/</string>
+    <string name="profile_blank_status">No tienes estado, añade uno!</string>
+    <string name="profile_created_at">Fecha creación</string>
+    <string name="profile_status">Estado</string>
 </resources>

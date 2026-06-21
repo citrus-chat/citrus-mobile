@@ -11,9 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.citruschat.citrusmobile.R
 import com.citruschat.citrusmobile.domain.model.User
 
 @Composable
@@ -28,14 +30,14 @@ fun ProfileHeader(user: User?) {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = user?.username?.takeIf { it.isNotBlank() } ?: "Unknown user",
+                text = user?.username?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_unknown_user),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = user?.email?.takeIf { it.isNotBlank() } ?: "No email available",
+                text = user?.email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_unknown_email),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -46,6 +48,6 @@ fun ProfileHeader(user: User?) {
 
     Spacer(modifier = Modifier.height(28.dp))
 
-    ProfileField(label = "Status", value = user?.statusMessage?.takeIf { it.isNotBlank() } ?: "No status message")
-    ProfileField(label = "Created", value = user?.createdAt?.takeIf { it.isNotBlank() } ?: "Unknown")
+    ProfileField(label = stringResource(R.string.profile_status), value = user?.statusMessage?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_blank_status))
+    ProfileField(label = stringResource(R.string.profile_created_at), value = user?.createdAt?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_blank_created_at))
 }

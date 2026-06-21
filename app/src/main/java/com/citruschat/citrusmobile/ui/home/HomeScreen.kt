@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,7 +65,7 @@ fun HomeScreen(
             value = uiState.searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Search chats or people") },
+            label = { Text(stringResource(R.string.chats_search_placeholder)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -76,7 +77,7 @@ fun HomeScreen(
                     IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear search",
+                            contentDescription = stringResource(R.string.chats_search_clear),
                         )
                     }
                 }
@@ -98,16 +99,18 @@ fun HomeScreen(
 
         if (uiState.chats.isEmpty() && uiState.userResults.isEmpty()) {
             Text(
-                text = if (uiState.searchQuery.isBlank()) "No chats yet" else "No chats or people match your search",
+                text = stringResource(R.string.chats_search_empty),
                 style = MaterialTheme.typography.bodyMedium,
             )
         } else {
+            val chatsTitle = stringResource(R.string.chats_search_chats_title)
+            val usersTitle = stringResource(R.string.chats_search_users_title)
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(bottom = dimensionResource(R.dimen.padding_medium)),
             ) {
                 if (uiState.chats.isNotEmpty()) {
-                    itemHeader(text = "Chats")
+                    itemHeader(text = chatsTitle)
                     items(
                         items = uiState.chats,
                         key = { chat -> "chat-${chat.id}" },
@@ -120,7 +123,7 @@ fun HomeScreen(
                 }
 
                 if (uiState.userResults.isNotEmpty()) {
-                    itemHeader(text = "People")
+                    itemHeader(text = usersTitle)
                     items(
                         items = uiState.userResults,
                         key = { user -> "user-${user.id}" },
