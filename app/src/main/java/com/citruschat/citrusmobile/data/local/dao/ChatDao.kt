@@ -41,6 +41,18 @@ interface ChatDao {
         participantCount: Int,
     ): Long?
 
+    @Query(
+        """
+        UPDATE chats
+        SET localProfilePicturePath = :path
+        WHERE id = :chatId
+        """,
+    )
+    suspend fun updateLocalProfilePicturePath(
+        chatId: Long,
+        path: String,
+    )
+
     @Transaction
     @Query(
         """
@@ -56,7 +68,10 @@ interface ChatDao {
                     ORDER BY latest_messages.timestamp DESC, latest_messages.id DESC
                     LIMIT 1
                 )
-            ) AS lastMessageId
+            ) AS lastMessageId,
+            chats.localProfilePicturePath,
+            chats.remoteProfilePictureUrl,
+            chats.type
         FROM chats
         LEFT JOIN messages ON messages.id = COALESCE(
             chats.lastMessageId,

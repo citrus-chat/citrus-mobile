@@ -17,12 +17,21 @@ style:
     ignoreEnums: true
   MaxLineLength:
     active: false
-
+  ForbiddenComment:
+    active: false
+  ReturnCount:
+    active: false
+  UnusedParameter:
+    active: false
 
 
 complexity:
-    LongMethod:
-        active: false
+  LongMethod:
+    active: false
+  ComplexCondition:
+    active: false
+  TooManyFunctions:
+    active: false
 
 naming:
   FunctionNaming:

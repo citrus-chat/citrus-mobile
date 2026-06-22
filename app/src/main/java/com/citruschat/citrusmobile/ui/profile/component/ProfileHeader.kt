@@ -19,12 +19,22 @@ import com.citruschat.citrusmobile.R
 import com.citruschat.citrusmobile.domain.model.User
 
 @Composable
-fun ProfileHeader(user: User?) {
+fun ProfileHeader(
+    user: User?,
+    avatarLocalPath: String?,
+    isAvatarUploading: Boolean,
+    onAvatarClick: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ProfileAvatar(user = user)
+        ProfileAvatar(
+            user = user,
+            avatarLocalPath = avatarLocalPath,
+            isUploading = isAvatarUploading,
+            onClick = onAvatarClick,
+        )
 
         Spacer(modifier = Modifier.width(16.dp))
 

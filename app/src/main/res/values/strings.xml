@@ -30,4 +30,6 @@
     <string name="profile_blank_status">No tienes estado, añade uno!</string>
     <string name="profile_created_at">Fecha creación</string>
     <string name="profile_status">Estado</string>
+    <string name="profile_change_avatar">Cambiar foto de perfil</string>
+    <string name="chat_item_empty_chat">" "</string>
 </resources>
