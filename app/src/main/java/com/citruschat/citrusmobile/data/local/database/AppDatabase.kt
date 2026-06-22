@@ -17,7 +17,7 @@ import com.citruschat.citrusmobile.data.local.entity.UserEntity
         ChatParticipantCrossRef::class,
         UserEntity::class,
     ],
-    version = 5,
+    version = 8,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun messageDao(): MessageDao

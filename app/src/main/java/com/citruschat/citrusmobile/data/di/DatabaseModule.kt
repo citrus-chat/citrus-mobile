@@ -13,6 +13,8 @@ import com.citruschat.citrusmobile.data.repository.ChatRepositoryImpl
 import com.citruschat.citrusmobile.data.repository.MessageRepositoryImpl
 import com.citruschat.citrusmobile.data.repository.ThemeRepositoryImpl
 import com.citruschat.citrusmobile.data.repository.UserRepositoryImpl
+import com.citruschat.citrusmobile.data.user.FileUserAvatarLocalDataSource
+import com.citruschat.citrusmobile.data.user.UserAvatarLocalDataSource
 import com.citruschat.citrusmobile.data.user.UserRemoteDataSource
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
 import com.citruschat.citrusmobile.domain.repository.MessageRepository
@@ -38,8 +40,14 @@ object DatabaseModule {
                 context,
                 AppDatabase::class.java,
                 "citrus.db",
-            ).addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
-            .build()
+            ).addMigrations(
+                MIGRATION_2_3,
+                MIGRATION_3_4,
+                MIGRATION_4_5,
+                MIGRATION_5_6,
+                MIGRATION_6_7,
+                MIGRATION_7_8,
+            ).build()
 
     @Provides
     fun provideMessageDao(database: AppDatabase): MessageDao = database.messageDao()
@@ -58,8 +66,11 @@ object DatabaseModule {
     @Singleton
     fun provideChatRepository(
         dao: ChatDao,
+        userDao: UserDao,
+        userRemoteDataSource: UserRemoteDataSource,
+        avatarLocalDataSource: UserAvatarLocalDataSource,
         logger: Logger,
-    ): ChatRepository = ChatRepositoryImpl(dao, logger)
+    ): ChatRepository = ChatRepositoryImpl(dao, userDao, userRemoteDataSource, avatarLocalDataSource, logger)
 
     @Provides
     fun provideUserDao(database: AppDatabase): UserDao = database.userDao()
@@ -69,8 +80,13 @@ object DatabaseModule {
     fun provideUserRepository(
         dao: UserDao,
         userRemoteDataSource: UserRemoteDataSource,
+        avatarLocalDataSource: UserAvatarLocalDataSource,
         logger: Logger,
-    ): UserRepository = UserRepositoryImpl(dao, userRemoteDataSource, logger)
+    ): UserRepository = UserRepositoryImpl(dao, userRemoteDataSource, avatarLocalDataSource, logger)
+
+    @Provides
+    @Singleton
+    fun provideUserAvatarLocalDataSource(localDataSource: FileUserAvatarLocalDataSource): UserAvatarLocalDataSource = localDataSource
 
     @Provides
     @Singleton
@@ -121,5 +137,105 @@ private val MIGRATION_4_5 =
     object : Migration(4, 5) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("ALTER TABLE messages ADD COLUMN deliveryStatus TEXT NOT NULL DEFAULT 'SENT'")
+        }
+    }
+
+private val MIGRATION_5_6 =
+    object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE chats ADD COLUMN profilePictureUrl TEXT")
+        }
+    }
+
+private val MIGRATION_6_7 =
+    object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE users_new (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    email TEXT NOT NULL,
+                    username TEXT NOT NULL,
+                    remoteProfilePictureUrl TEXT,
+                    localProfilePicturePath TEXT,
+                    statusMessage TEXT,
+                    createdAt TEXT NOT NULL DEFAULT '',
+                    isCurrentUser INTEGER NOT NULL DEFAULT 0
+                )
+                """.trimIndent(),
+            )
+            db.execSQL(
+                """
+                INSERT INTO users_new (
+                    id,
+                    email,
+                    username,
+                    remoteProfilePictureUrl,
+                    localProfilePicturePath,
+                    statusMessage,
+                    createdAt,
+                    isCurrentUser
+                )
+                SELECT
+                    id,
+                    email,
+                    username,
+                    profilePictureUrl,
+                    NULL,
+                    statusMessage,
+                    createdAt,
+                    isCurrentUser
+                FROM users
+                """.trimIndent(),
+            )
+
+            db.execSQL(
+                """
+                CREATE TABLE chats_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    name TEXT NOT NULL,
+                    lastMessageId INTEGER,
+                    remoteProfilePictureUrl TEXT,
+                    localProfilePicturePath TEXT,
+                    FOREIGN KEY(lastMessageId) REFERENCES messages(id) ON UPDATE NO ACTION ON DELETE SET NULL
+                )
+                """.trimIndent(),
+            )
+            db.execSQL(
+                """
+                INSERT INTO chats_new (
+                    id,
+                    name,
+                    lastMessageId,
+                    remoteProfilePictureUrl,
+                    localProfilePicturePath
+                )
+                SELECT
+                    id,
+                    name,
+                    lastMessageId,
+                    profilePictureUrl,
+                    NULL
+                FROM chats
+                """.trimIndent(),
+            )
+
+            db.execSQL("DROP TABLE users")
+            db.execSQL("ALTER TABLE users_new RENAME TO users")
+            db.execSQL("DROP TABLE chats")
+            db.execSQL("ALTER TABLE chats_new RENAME TO chats")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_chats_lastMessageId ON chats(lastMessageId)")
+        }
+    }
+
+private val MIGRATION_7_8 =
+    object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                ALTER TABLE chats
+                ADD COLUMN type TEXT NOT NULL DEFAULT 'DIRECT'
+                """.trimIndent(),
+            )
         }
     }

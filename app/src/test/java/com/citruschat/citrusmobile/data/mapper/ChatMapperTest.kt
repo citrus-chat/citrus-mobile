@@ -5,6 +5,7 @@ import com.citruschat.citrusmobile.data.local.entity.ChatListItemEntity
 import com.citruschat.citrusmobile.data.local.entity.ChatParticipantCrossRef
 import com.citruschat.citrusmobile.data.local.entity.MessageEntity
 import com.citruschat.citrusmobile.data.local.entity.UserEntity
+import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 import com.citruschat.citrusmobile.domain.model.Chat
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
@@ -14,7 +15,7 @@ import org.junit.Test
 class ChatMapperTest {
     @Test
     fun `maps chat entity to domain`() {
-        val entity = ChatEntity(id = 12, name = "General", lastMessageId = 99)
+        val entity = ChatEntity(id = 12, name = "General", type = ChatType.GROUP, lastMessageId = 99)
 
         val domain = entity.toDomain(participantUserIds = listOf("user-1", "user-2"))
 
@@ -22,6 +23,7 @@ class ChatMapperTest {
             Chat(
                 id = 12,
                 name = "General",
+                type = ChatType.GROUP,
                 lastMessageId = 99,
                 participantUserIds = listOf("user-1", "user-2"),
             ),
@@ -30,12 +32,47 @@ class ChatMapperTest {
     }
 
     @Test
-    fun `maps chat domain to entity`() {
-        val domain = Chat(id = 7, name = "Support", lastMessageId = null)
+    fun `maps direct chat domain to entity without dedicated avatar`() {
+        val domain =
+            Chat(
+                id = 7,
+                name = "Support",
+                type = ChatType.DIRECT,
+                remoteProfilePictureUrl = "https://example.com/ignored.png",
+                localProfilePicturePath = "/local/ignored.png",
+            )
 
         val entity = domain.toEntity()
 
-        assertEquals(ChatEntity(id = 7, name = "Support", lastMessageId = null), entity)
+        assertEquals(
+            ChatEntity(id = 7, name = "Support", type = ChatType.DIRECT),
+            entity,
+        )
+    }
+
+    @Test
+    fun `maps group chat domain to entity with dedicated avatar`() {
+        val domain =
+            Chat(
+                id = 8,
+                name = "Team",
+                type = ChatType.GROUP,
+                remoteProfilePictureUrl = "https://example.com/team.png",
+                localProfilePicturePath = "/local/team.png",
+            )
+
+        val entity = domain.toEntity()
+
+        assertEquals(
+            ChatEntity(
+                id = 8,
+                name = "Team",
+                type = ChatType.GROUP,
+                remoteProfilePictureUrl = "https://example.com/team.png",
+                localProfilePicturePath = "/local/team.png",
+            ),
+            entity,
+        )
     }
 
     @Test
@@ -54,10 +91,10 @@ class ChatMapperTest {
     }
 
     @Test
-    fun `maps chat list item with last message preview and participants`() {
+    fun `direct chat summary uses other participant name and local avatar`() {
         val listItem =
             ChatListItemEntity(
-                chat = ChatEntity(id = 3, name = "Project", lastMessageId = 44),
+                chat = ChatEntity(id = 3, name = "Project", type = ChatType.DIRECT, lastMessageId = 44),
                 lastMessage =
                     MessageEntity(
                         id = 44,
@@ -71,29 +108,35 @@ class ChatMapperTest {
                 participants =
                     listOf(
                         UserEntity(
-                            id = "user-1",
-                            email = "ada@example.com",
-                            username = "ada",
-                            profilePictureUrl = "https://example.com/ada.png",
+                            id = "current-user",
+                            email = "me@example.com",
+                            username = "me",
+                            remoteProfilePictureUrl = "https://example.com/me.png",
+                            localProfilePicturePath = "/local/me.png",
                         ),
                         UserEntity(
                             id = "user-2",
                             email = "grace@example.com",
                             username = "grace",
+                            remoteProfilePictureUrl = "https://example.com/grace.png",
+                            localProfilePicturePath = "/local/grace.png",
                         ),
                     ),
             )
 
-        val summary = listItem.toSummary()
+        val summary = listItem.toSummary(currentUserId = "current-user")
 
         assertEquals(
             ChatListItemSummary(
                 id = 3,
-                name = "Project",
+                name = "grace",
+                type = ChatType.DIRECT,
                 lastMessagePreview = "See you soon",
-                participantUserIds = listOf("user-1", "user-2"),
-                participantUsernames = listOf("ada", "grace"),
-                participantAvatarUrls = listOf("https://example.com/ada.png", null),
+                localProfilePicturePath = "/local/grace.png",
+                remoteProfilePictureUrl = "https://example.com/grace.png",
+                participantUserIds = listOf("current-user", "user-2"),
+                participantUsernames = listOf("me", "grace"),
+                participantAvatarUrls = listOf("/local/me.png", "/local/grace.png"),
                 lastMessageStatus = MessageDeliveryStatus.VIEWED,
             ),
             summary,
@@ -101,20 +144,30 @@ class ChatMapperTest {
     }
 
     @Test
-    fun `maps chat list item without last message preview`() {
+    fun `group chat summary uses dedicated chat avatar`() {
         val listItem =
             ChatListItemEntity(
-                chat = ChatEntity(id = 4, name = "Empty", lastMessageId = null),
+                chat =
+                    ChatEntity(
+                        id = 4,
+                        name = "Team",
+                        type = ChatType.GROUP,
+                        remoteProfilePictureUrl = "https://example.com/team.png",
+                        localProfilePicturePath = "/local/team.png",
+                    ),
                 lastMessage = null,
             )
 
-        val summary = listItem.toSummary()
+        val summary = listItem.toSummary(currentUserId = "current-user")
 
         assertEquals(
             ChatListItemSummary(
                 id = 4,
-                name = "Empty",
+                name = "Team",
+                type = ChatType.GROUP,
                 lastMessagePreview = null,
+                localProfilePicturePath = "/local/team.png",
+                remoteProfilePictureUrl = "https://example.com/team.png",
             ),
             summary,
         )

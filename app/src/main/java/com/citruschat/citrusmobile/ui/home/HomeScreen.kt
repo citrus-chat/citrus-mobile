@@ -130,6 +130,7 @@ fun HomeScreen(
                     ) { user ->
                         UserSearchResultComponent(
                             user = user,
+                            avatarLocalPath = user.localProfilePicturePath,
                             onClick = { viewModel.onUserResultClick(user) },
                         )
                     }

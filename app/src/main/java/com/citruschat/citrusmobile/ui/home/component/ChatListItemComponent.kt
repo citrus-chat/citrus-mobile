@@ -40,15 +40,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.citruschat.citrusmobile.R
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.URL
 
 @Composable
 fun ChatListItemComponent(
@@ -90,7 +91,7 @@ fun ChatListItemComponent(
         ) {
             ChatAvatar(
                 name = chat.name,
-                avatarUrl = chat.participantAvatarUrls.firstOrNull(),
+                avatarLocalPath = chat.localProfilePicturePath,
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -116,7 +117,7 @@ fun ChatListItemComponent(
 
                     val previewText = chat.activityText?.takeIf { it.isNotBlank() } ?: chat.lastMessagePreview.orEmpty()
                     Text(
-                        text = previewText.ifBlank { "No messages yet" },
+                        text = previewText.ifBlank { stringResource(R.string.chat_item_empty_chat) },
                         style = MaterialTheme.typography.bodyMedium,
                         color =
                             if (chat.activityText.isNullOrBlank()) {
@@ -137,7 +138,7 @@ fun ChatListItemComponent(
 @Composable
 private fun ChatAvatar(
     name: String,
-    avatarUrl: String?,
+    avatarLocalPath: String?,
     size: Dp = 52.dp,
 ) {
     val initial =
@@ -148,6 +149,13 @@ private fun ChatAvatar(
             ?.toString()
             ?: "?"
 
+    val bitmap by produceState<Bitmap?>(
+        initialValue = null,
+        avatarLocalPath,
+    ) {
+        value = avatarLocalPath?.let { loadBitmap(it) }
+    }
+
     Surface(
         modifier =
             Modifier
@@ -156,7 +164,7 @@ private fun ChatAvatar(
         color = MaterialTheme.colorScheme.primaryContainer,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            if (avatarUrl.isNullOrBlank()) {
+            if (bitmap == null) {
                 Text(
                     text = initial,
                     style = MaterialTheme.typography.titleLarge,
@@ -164,25 +172,12 @@ private fun ChatAvatar(
                     fontWeight = FontWeight.Bold,
                 )
             } else {
-                val bitmap by produceState<Bitmap?>(initialValue = null, avatarUrl) {
-                    value = loadBitmap(avatarUrl)
-                }
-
-                if (bitmap == null) {
-                    Text(
-                        text = initial,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold,
-                    )
-                } else {
-                    Image(
-                        bitmap = bitmap!!.asImageBitmap(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                Image(
+                    bitmap = bitmap!!.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
     }
@@ -230,9 +225,7 @@ private fun MessageDeliveryStatus.label(): String =
         MessageDeliveryStatus.FAILED -> "Failed"
     }
 
-private suspend fun loadBitmap(url: String) =
+private suspend fun loadBitmap(path: String) =
     withContext(Dispatchers.IO) {
-        runCatching {
-            URL(url).openStream().use(BitmapFactory::decodeStream)
-        }.getOrNull()
+        BitmapFactory.decodeFile(path)
     }

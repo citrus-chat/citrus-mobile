@@ -13,6 +13,23 @@ object UserApiResponseParser {
         return users.toUserList()
     }
 
+    fun parseCurrentUser(responseBody: String): User {
+        val user = JSONObject(responseBody).getJSONObject("data")
+        return User(
+            id = user.requiredString("userId"),
+            email = user.requiredString("email"),
+            username = user.requiredString("username"),
+            remoteProfilePictureUrl = user.optionalString("avatar_url"),
+            localProfilePicturePath = null,
+            isCurrentUser = true,
+        )
+    }
+
+    fun parseAvatarUrl(responseBody: String): String? =
+        JSONObject(responseBody)
+            .getJSONObject("data")
+            .optionalString("avatar_url")
+
     private fun JSONArray.toUserList(): List<User> =
         buildList {
             for (index in 0 until length()) {
@@ -25,7 +42,8 @@ object UserApiResponseParser {
             id = requiredString("id"),
             email = requiredString("email"),
             username = requiredString("username"),
-            profilePictureUrl = optionalString("avatar_url"),
+            remoteProfilePictureUrl = optionalString("avatar_url"),
+            localProfilePicturePath = null,
         )
 
     private fun JSONObject.requiredString(name: String): String =

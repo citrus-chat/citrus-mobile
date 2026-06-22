@@ -3,6 +3,7 @@ package com.citruschat.citrusmobile.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.citruschat.citrusmobile.core.logging.Logger
+import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 import com.citruschat.citrusmobile.domain.model.Chat
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import com.citruschat.citrusmobile.domain.model.User
@@ -100,12 +101,21 @@ class HomeViewModel
                 val participantUserIds =
                     listOfNotNull(currentUser?.id, user.id)
                         .distinct()
+                if (participantUserIds.size < DIRECT_CHAT_MAX_PARTICIPANTS) {
+                    logger.w(
+                        TAG,
+                        "Skipping direct chat creation because participants are not distinct currentUserId=${currentUser?.id} selectedUserId=${user.id}",
+                    )
+                    return@launch
+                }
+
                 val chatId =
                     chatRepository.findDirectChatId(participantUserIds)
                         ?: chatRepository.createChat(
                             Chat(
                                 name = user.displayName,
                                 participantUserIds = participantUserIds,
+                                type = ChatType.DIRECT,
                             ),
                         )
 
