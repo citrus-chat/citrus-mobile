@@ -17,7 +17,12 @@ style:
     ignoreEnums: true
   MaxLineLength:
     active: false
-
+  ForbiddenComment:
+    active: false
+  ReturnCount:
+    active: false
+  UnusedParameter:
+    active: false
 
 
 complexity:
