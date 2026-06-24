@@ -33,7 +33,7 @@ class EncryptedPrefsDeviceIdentityProvider
             getOrCreateSecretKey()
         }
 
-        private val keyGenerator = X25519IdentityKeyGenerator()
+        private val keyGenerator = P256IdentityKeyGenerator()
 
         override suspend fun getOrCreateDeviceIdentity(): DeviceIdentity {
             loadDeviceIdentity()?.let { identity ->
@@ -99,6 +99,11 @@ class EncryptedPrefsDeviceIdentityProvider
 
             return try {
                 decrypt(encryptedPrivateKey, privateKeyIv)
+                if (!hasExpectedPublicKeyFormat(publicKey)) {
+                    logger.w(TAG, "Stored device identity has unsupported public key format")
+                    return null
+                }
+
                 DeviceIdentity(
                     deviceId = deviceId,
                     deviceName = deviceName,
@@ -113,6 +118,13 @@ class EncryptedPrefsDeviceIdentityProvider
                 null
             }
         }
+
+        private fun hasExpectedPublicKeyFormat(publicKey: String): Boolean =
+            runCatching {
+                val decoded = Base64.decode(publicKey, Base64.NO_WRAP)
+                decoded.size == P256IdentityKeyGenerator.RAW_PUBLIC_KEY_SIZE_BYTES &&
+                    decoded.firstOrNull() == UNCOMPRESSED_POINT_PREFIX
+            }.getOrDefault(false)
 
         private fun deviceName(): String {
             val manufacturer = Build.MANUFACTURER.trim()
@@ -203,6 +215,7 @@ class EncryptedPrefsDeviceIdentityProvider
             private const val TRANSFORMATION = "AES/GCM/NoPadding"
             private const val GCM_TAG_SIZE = 128
             private const val AES_KEY_SIZE = 256
+            private const val UNCOMPRESSED_POINT_PREFIX = 0x04.toByte()
 
             private const val TAG = "DeviceIdentityProvider"
         }

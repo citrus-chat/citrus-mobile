@@ -171,7 +171,7 @@ Current behavior:
 - `EncryptedPrefsDeviceIdentityProvider` creates a UUID device id.
 - Device type is `"MOBILE"`.
 - Device name comes from Android manufacturer/model.
-- X25519 key generation is handled by `X25519IdentityKeyGenerator`.
+- P-256 ECDH key generation is handled by `P256IdentityKeyGenerator`.
 - Public key is sent to the backend.
 - Private key material is stored encrypted with Android Keystore AES/GCM.
 - Logout clears local device identity.
