@@ -6,6 +6,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.local.dao.ChatDao
+import com.citruschat.citrusmobile.data.local.dao.ConversationKeyDao
 import com.citruschat.citrusmobile.data.local.dao.MessageDao
 import com.citruschat.citrusmobile.data.local.dao.UserDao
 import com.citruschat.citrusmobile.data.local.database.AppDatabase
@@ -47,17 +48,37 @@ object DatabaseModule {
                 MIGRATION_5_6,
                 MIGRATION_6_7,
                 MIGRATION_7_8,
+                MIGRATION_8_9,
             ).build()
 
     @Provides
     fun provideMessageDao(database: AppDatabase): MessageDao = database.messageDao()
 
     @Provides
+    fun provideConversationKeyDao(database: AppDatabase): ConversationKeyDao = database.conversationKeyDao()
+
+    @Provides
     @Singleton
     fun provideMessageRepository(
         dao: MessageDao,
+        chatDao: ChatDao,
+        userDao: UserDao,
+        conversationKeyDao: ConversationKeyDao,
+        remoteDataSource: com.citruschat.citrusmobile.data.message.MessageRemoteDataSource,
+        deviceIdentityProvider: com.citruschat.citrusmobile.data.device.DeviceIdentityProvider,
+        cryptoService: com.citruschat.citrusmobile.data.crypto.ChatCryptoService,
         logger: Logger,
-    ): MessageRepository = MessageRepositoryImpl(dao, logger)
+    ): MessageRepository =
+        MessageRepositoryImpl(
+            dao = dao,
+            chatDao = chatDao,
+            userDao = userDao,
+            conversationKeyDao = conversationKeyDao,
+            remoteDataSource = remoteDataSource,
+            deviceIdentityProvider = deviceIdentityProvider,
+            cryptoService = cryptoService,
+            logger = logger,
+        )
 
     @Provides
     fun provideChatDao(database: AppDatabase): ChatDao = database.chatDao()
@@ -67,10 +88,25 @@ object DatabaseModule {
     fun provideChatRepository(
         dao: ChatDao,
         userDao: UserDao,
+        conversationKeyDao: ConversationKeyDao,
         userRemoteDataSource: UserRemoteDataSource,
+        chatRemoteDataSource: com.citruschat.citrusmobile.data.chat.ChatRemoteDataSource,
         avatarLocalDataSource: UserAvatarLocalDataSource,
+        deviceIdentityProvider: com.citruschat.citrusmobile.data.device.DeviceIdentityProvider,
+        cryptoService: com.citruschat.citrusmobile.data.crypto.ChatCryptoService,
         logger: Logger,
-    ): ChatRepository = ChatRepositoryImpl(dao, userDao, userRemoteDataSource, avatarLocalDataSource, logger)
+    ): ChatRepository =
+        ChatRepositoryImpl(
+            dao = dao,
+            userDao = userDao,
+            conversationKeyDao = conversationKeyDao,
+            userRemoteDataSource = userRemoteDataSource,
+            chatRemoteDataSource = chatRemoteDataSource,
+            avatarLocalDataSource = avatarLocalDataSource,
+            deviceIdentityProvider = deviceIdentityProvider,
+            cryptoService = cryptoService,
+            logger = logger,
+        )
 
     @Provides
     fun provideUserDao(database: AppDatabase): UserDao = database.userDao()
@@ -235,6 +271,38 @@ private val MIGRATION_7_8 =
                 """
                 ALTER TABLE chats
                 ADD COLUMN type TEXT NOT NULL DEFAULT 'DIRECT'
+                """.trimIndent(),
+            )
+        }
+    }
+
+private val MIGRATION_8_9 =
+    object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE chats ADD COLUMN remoteId TEXT")
+            db.execSQL("ALTER TABLE chats ADD COLUMN createdAt TEXT")
+            db.execSQL("ALTER TABLE chats ADD COLUMN updatedAt TEXT")
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_chats_remoteId ON chats(remoteId)")
+            db.execSQL("ALTER TABLE chat_participants ADD COLUMN remoteParticipantId TEXT")
+
+            db.execSQL("ALTER TABLE messages ADD COLUMN remoteId TEXT")
+            db.execSQL("ALTER TABLE messages ADD COLUMN senderUserId TEXT")
+            db.execSQL("ALTER TABLE messages ADD COLUMN senderDeviceId TEXT")
+            db.execSQL("ALTER TABLE messages ADD COLUMN replyToMessageId TEXT")
+            db.execSQL("ALTER TABLE messages ADD COLUMN keyVersion INTEGER")
+            db.execSQL("ALTER TABLE messages ADD COLUMN iv TEXT")
+            db.execSQL("ALTER TABLE messages ADD COLUMN ciphertext TEXT")
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_messages_remoteId ON messages(remoteId)")
+
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS conversation_keys (
+                    conversationId TEXT NOT NULL,
+                    keyVersion INTEGER NOT NULL,
+                    `key` TEXT NOT NULL,
+                    createdAt TEXT NOT NULL,
+                    PRIMARY KEY(conversationId, keyVersion)
+                )
                 """.trimIndent(),
             )
         }

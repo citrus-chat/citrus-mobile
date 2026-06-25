@@ -66,6 +66,13 @@ class HomeViewModel
                     )
                 }
 
+        init {
+            viewModelScope.launch {
+                runCatching { chatRepository.syncChats() }
+                    .onFailure { throwable -> logger.e(TAG, "Chat sync failed", throwable) }
+            }
+        }
+
         val uiState: StateFlow<HomeUiState> =
             combine(searchQuery, searchResults) { rawQuery, results ->
                 val typedQuery = rawQuery.trim()

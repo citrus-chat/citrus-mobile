@@ -69,6 +69,46 @@ object AuthModule {
 
     @Provides
     @Singleton
+    fun provideChatApiClient(
+        okHttpClient: OkHttpClient,
+        tokenStore: TokenStore,
+        logger: Logger,
+    ): com.citruschat.citrusmobile.data.chat.ChatApiClient =
+        com.citruschat.citrusmobile.data.chat.ChatApiClient(
+            okHttpClient = okHttpClient,
+            tokenStore = tokenStore,
+            logger = logger,
+            baseUrl = BuildConfig.API_BASE_URL,
+        )
+
+    @Provides
+    @Singleton
+    fun provideChatRemoteDataSource(
+        chatApiClient: com.citruschat.citrusmobile.data.chat.ChatApiClient,
+    ): com.citruschat.citrusmobile.data.chat.ChatRemoteDataSource = chatApiClient
+
+    @Provides
+    @Singleton
+    fun provideMessageApiClient(
+        okHttpClient: OkHttpClient,
+        tokenStore: TokenStore,
+        logger: Logger,
+    ): com.citruschat.citrusmobile.data.message.MessageApiClient =
+        com.citruschat.citrusmobile.data.message.MessageApiClient(
+            okHttpClient = okHttpClient,
+            tokenStore = tokenStore,
+            logger = logger,
+            baseUrl = BuildConfig.API_BASE_URL,
+        )
+
+    @Provides
+    @Singleton
+    fun provideMessageRemoteDataSource(
+        messageApiClient: com.citruschat.citrusmobile.data.message.MessageApiClient,
+    ): com.citruschat.citrusmobile.data.message.MessageRemoteDataSource = messageApiClient
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(
         authRemoteDataSource: AuthRemoteDataSource,
         tokenStore: TokenStore,

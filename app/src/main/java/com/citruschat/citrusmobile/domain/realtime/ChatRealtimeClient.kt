@@ -12,6 +12,10 @@ interface ChatRealtimeClient {
         accessToken: String?,
     )
 
+    fun subscribeToChatRoom(chatRoomId: String)
+
+    fun unsubscribeFromChatRoom(chatRoomId: String)
+
     /** Disconnect (idempotent). */
     fun disconnect()
 }
@@ -27,7 +31,10 @@ sealed interface ChatRealtimeEvent {
         val throwable: Throwable,
     ) : ChatRealtimeEvent
 
-    /** Raw payload for now; later decode to typed events (new message, etc.). */
+    data class ChatRoomMessage(
+        val chatRoomId: String,
+    ) : ChatRealtimeEvent
+
     data class TextMessage(
         val text: String,
     ) : ChatRealtimeEvent

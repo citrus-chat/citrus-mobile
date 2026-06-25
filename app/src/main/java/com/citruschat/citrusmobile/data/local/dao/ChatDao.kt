@@ -16,6 +16,9 @@ interface ChatDao {
     suspend fun insert(chat: ChatEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(chat: ChatEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertParticipants(participants: List<ChatParticipantCrossRef>)
 
     @Query("DELETE FROM chats WHERE id = :chatId")
@@ -41,6 +44,38 @@ interface ChatDao {
         participantCount: Int,
     ): Long?
 
+    @Query("SELECT id FROM chats WHERE remoteId = :remoteId LIMIT 1")
+    suspend fun findIdByRemoteId(remoteId: String): Long?
+
+    @Query("SELECT * FROM chats WHERE id = :chatId LIMIT 1")
+    suspend fun getById(chatId: Long): ChatEntity?
+
+    @Query("SELECT remoteParticipantId FROM chat_participants WHERE chatId = :chatId AND userId = :userId LIMIT 1")
+    suspend fun findRemoteParticipantId(
+        chatId: Long,
+        userId: String,
+    ): String?
+
+    @Query(
+        """
+        UPDATE chats
+        SET remoteId = :remoteId,
+            name = :name,
+            type = :type,
+            createdAt = :createdAt,
+            updatedAt = :updatedAt
+        WHERE id = :chatId
+        """,
+    )
+    suspend fun updateRemoteMetadata(
+        chatId: Long,
+        remoteId: String,
+        name: String,
+        type: com.citruschat.citrusmobile.data.local.entity.type.ChatType,
+        createdAt: String?,
+        updatedAt: String?,
+    )
+
     @Query(
         """
         UPDATE chats
@@ -58,6 +93,7 @@ interface ChatDao {
         """
         SELECT DISTINCT
             chats.id,
+            chats.remoteId,
             chats.name,
             COALESCE(
                 chats.lastMessageId,
@@ -71,7 +107,9 @@ interface ChatDao {
             ) AS lastMessageId,
             chats.localProfilePicturePath,
             chats.remoteProfilePictureUrl,
-            chats.type
+            chats.type,
+            chats.createdAt,
+            chats.updatedAt
         FROM chats
         LEFT JOIN messages ON messages.id = COALESCE(
             chats.lastMessageId,

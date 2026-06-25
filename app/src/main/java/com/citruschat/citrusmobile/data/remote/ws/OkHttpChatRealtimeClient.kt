@@ -11,6 +11,8 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,24 +36,22 @@ class OkHttpChatRealtimeClient
         override val events: Flow<ChatRealtimeEvent> = _events
 
         private val socketRef = AtomicReference<WebSocket?>(null)
+        private val stompConnected = AtomicBoolean(false)
+        private val subscribedChatRooms = ConcurrentHashMap.newKeySet<String>()
+        private val accessTokenRef = AtomicReference<String?>()
 
         override fun connect(
             url: String,
             accessToken: String?,
         ) {
+            accessTokenRef.set(accessToken)
             if (socketRef.get() != null) {
                 logger.w(TAG, "Realtime connect ignored because socket already exists")
                 return
             }
             logger.i(TAG, "Realtime connect requested for url=$url")
 
-            val requestBuilder = Request.Builder().url(url)
-            if (!accessToken.isNullOrBlank()) {
-                requestBuilder.header("Authorization", "Bearer $accessToken")
-                logger.d(TAG, "Realtime auth header attached")
-            }
-
-            val request = requestBuilder.build()
+            val request = Request.Builder().url(url).build()
 
             val webSocket =
                 okHttpClient.newWebSocket(
@@ -61,16 +61,15 @@ class OkHttpChatRealtimeClient
                             webSocket: WebSocket,
                             response: Response,
                         ) {
-                            logger.i(TAG, "Realtime connected")
-                            _events.tryEmit(ChatRealtimeEvent.Connected)
+                            logger.i(TAG, "Realtime socket opened")
+                            webSocket.send(StompFrameCodec.connectFrame(accessTokenRef.get()))
                         }
 
                         override fun onMessage(
                             webSocket: WebSocket,
                             text: String,
                         ) {
-                            logger.v(TAG, "Realtime message received length=${text.length}")
-                            _events.tryEmit(ChatRealtimeEvent.TextMessage(text))
+                            handleFrame(webSocket, text)
                         }
 
                         override fun onClosing(
@@ -90,6 +89,7 @@ class OkHttpChatRealtimeClient
                         ) {
                             logger.i(TAG, "Realtime closed: $code $reason")
                             _events.tryEmit(ChatRealtimeEvent.Disconnected("closed: $code $reason"))
+                            stompConnected.set(false)
                             socketRef.set(null)
                         }
 
@@ -100,6 +100,7 @@ class OkHttpChatRealtimeClient
                         ) {
                             logger.e(TAG, "Realtime failure", t)
                             _events.tryEmit(ChatRealtimeEvent.Failure(t))
+                            stompConnected.set(false)
                             socketRef.set(null)
                         }
                     },
@@ -108,9 +109,57 @@ class OkHttpChatRealtimeClient
             socketRef.set(webSocket)
         }
 
+        override fun subscribeToChatRoom(chatRoomId: String) {
+            if (chatRoomId.isBlank()) return
+            subscribedChatRooms.add(chatRoomId)
+            if (stompConnected.get()) {
+                socketRef.get()?.send(StompFrameCodec.subscribeFrame(chatRoomId))
+            }
+        }
+
+        override fun unsubscribeFromChatRoom(chatRoomId: String) {
+            if (chatRoomId.isBlank()) return
+            subscribedChatRooms.remove(chatRoomId)
+            socketRef.get()?.send(StompFrameCodec.unsubscribeFrame(chatRoomId))
+        }
+
         override fun disconnect() {
             logger.i(TAG, "Realtime disconnect requested")
+            socketRef.get()?.send(StompFrameCodec.disconnectFrame)
             socketRef.getAndSet(null)?.close(SOCKET_CLOSE_NORMAL, "client disconnect")
+            stompConnected.set(false)
+            subscribedChatRooms.clear()
+        }
+
+        private fun handleFrame(
+            webSocket: WebSocket,
+            rawFrame: String,
+        ) {
+            StompFrameCodec.parseEvents(rawFrame).forEach { event ->
+                when (event) {
+                    StompFrameEvent.Connected -> {
+                        stompConnected.set(true)
+                        subscribedChatRooms.forEach { chatRoomId ->
+                            webSocket.send(StompFrameCodec.subscribeFrame(chatRoomId))
+                        }
+                        logger.i(TAG, "Realtime STOMP connected")
+                        _events.tryEmit(ChatRealtimeEvent.Connected)
+                    }
+                    is StompFrameEvent.ChatRoomMessage -> {
+                        _events.tryEmit(ChatRealtimeEvent.ChatRoomMessage(event.chatRoomId))
+                    }
+                    is StompFrameEvent.TextMessage -> {
+                        _events.tryEmit(ChatRealtimeEvent.TextMessage(event.frame))
+                    }
+                    StompFrameEvent.Error -> {
+                        logger.w(TAG, "Realtime STOMP error frame received")
+                        _events.tryEmit(ChatRealtimeEvent.Disconnected("stomp error"))
+                    }
+                    is StompFrameEvent.Ignored -> {
+                        logger.v(TAG, "Realtime STOMP frame ignored command=${event.command}")
+                    }
+                }
+            }
         }
     }
 

@@ -11,17 +11,21 @@ import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 fun ChatEntity.toDomain(participantUserIds: List<String> = emptyList()) =
     Chat(
         id = id,
+        remoteId = remoteId,
         name = name,
         lastMessageId = lastMessageId,
         participantUserIds = participantUserIds,
         localProfilePicturePath = localProfilePicturePath,
         remoteProfilePictureUrl = remoteProfilePictureUrl,
         type = type,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 
 fun Chat.toEntity() =
     ChatEntity(
         id = id,
+        remoteId = remoteId,
         name = name,
         lastMessageId = lastMessageId,
         remoteProfilePictureUrl =
@@ -29,6 +33,8 @@ fun Chat.toEntity() =
         localProfilePicturePath =
             localProfilePicturePath.takeIf { type == ChatType.GROUP },
         type = type,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 
 fun Chat.toParticipantRefs(chatId: Long = id): List<ChatParticipantCrossRef> =
@@ -42,6 +48,7 @@ fun Chat.toParticipantRefs(chatId: Long = id): List<ChatParticipantCrossRef> =
 fun ChatListItemEntity.toSummary(currentUserId: String?) =
     ChatListItemSummary(
         id = chat.id,
+        remoteId = chat.remoteId,
         name = displayName(currentUserId),
         type = chat.type,
         lastMessagePreview = lastMessage?.text,
