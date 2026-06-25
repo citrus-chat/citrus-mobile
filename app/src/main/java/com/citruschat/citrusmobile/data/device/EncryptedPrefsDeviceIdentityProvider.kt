@@ -98,7 +98,7 @@ class EncryptedPrefsDeviceIdentityProvider
             }
 
             return try {
-                decrypt(encryptedPrivateKey, privateKeyIv)
+                val privateKey = decrypt(encryptedPrivateKey, privateKeyIv)
                 if (!hasExpectedPublicKeyFormat(publicKey)) {
                     logger.w(TAG, "Stored device identity has unsupported public key format")
                     return null
@@ -109,6 +109,7 @@ class EncryptedPrefsDeviceIdentityProvider
                     deviceName = deviceName,
                     deviceType = deviceType,
                     publicKey = publicKey,
+                    privateKey = privateKey,
                 )
             } catch (e: GeneralSecurityException) {
                 logger.e(TAG, "Failed to load local device identity", e)

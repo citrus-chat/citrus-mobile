@@ -4,6 +4,7 @@ import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 import com.citruschat.citrusmobile.domain.model.Chat
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
+import com.citruschat.citrusmobile.domain.model.ChatPermissions
 import com.citruschat.citrusmobile.domain.model.User
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
 import com.citruschat.citrusmobile.domain.repository.UserRepository
@@ -121,6 +122,12 @@ private class FakeChatRepository(
         createdChats += chat
         return createdChatId
     }
+
+    override suspend fun getRemoteChatId(chatId: Long): String? = null
+
+    override suspend fun syncChats() = Unit
+
+    override suspend fun getPermissions(chatId: Long): ChatPermissions = ChatPermissions()
 
     override suspend fun deleteChat(chatId: Long) = Unit
 

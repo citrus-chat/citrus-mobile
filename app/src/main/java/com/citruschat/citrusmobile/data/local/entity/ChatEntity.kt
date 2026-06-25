@@ -16,11 +16,15 @@ import com.citruschat.citrusmobile.data.local.entity.type.ChatType
             onDelete = ForeignKey.SET_NULL,
         ),
     ],
-    indices = [Index("lastMessageId")],
+    indices = [
+        Index("lastMessageId"),
+        Index(value = ["remoteId"], unique = true),
+    ],
 )
 data class ChatEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val remoteId: String? = null,
     val type: ChatType = ChatType.DIRECT,
     // For GROUP: real group name
     // For DIRECT: optional cached/display fallback, or empty
@@ -29,4 +33,6 @@ data class ChatEntity(
     // Only for GROUP/custom chat avatar
     val remoteProfilePictureUrl: String? = null,
     val localProfilePicturePath: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
 )

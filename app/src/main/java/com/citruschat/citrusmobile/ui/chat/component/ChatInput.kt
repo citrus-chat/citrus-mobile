@@ -22,6 +22,7 @@ fun ChatInput(
     onValueChange: (String) -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = modifier,
@@ -32,6 +33,7 @@ fun ChatInput(
             onValueChange = onValueChange,
             placeholder = { Text(stringResource(R.string.chatInput_placeholder)) },
             modifier = Modifier.weight(1f),
+            enabled = enabled,
         )
         Spacer(Modifier.width(8.dp))
         Button(
@@ -40,6 +42,7 @@ fun ChatInput(
                     .height(48.dp)
                     .width(48.dp)
                     .background(MaterialTheme.colorScheme.primary),
+            enabled = enabled && text.isNotBlank(),
             onClick = onClick,
             content = { Text(">") },
         )

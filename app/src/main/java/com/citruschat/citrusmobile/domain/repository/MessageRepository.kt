@@ -6,5 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface MessageRepository {
     fun observeMessages(chatId: Long): Flow<List<Message>>
 
+    suspend fun syncMessages(chatId: Long)
+
     suspend fun sendMessage(message: Message)
 }

@@ -29,4 +29,5 @@ import androidx.room.Index
 data class ChatParticipantCrossRef(
     val chatId: Long,
     val userId: String,
+    val remoteParticipantId: String? = null,
 )
