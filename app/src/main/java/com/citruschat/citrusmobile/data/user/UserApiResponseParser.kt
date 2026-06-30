@@ -1,6 +1,7 @@
 package com.citruschat.citrusmobile.data.user
 
 import com.citruschat.citrusmobile.domain.model.User
+import com.citruschat.citrusmobile.domain.model.UserProfile
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -25,6 +26,11 @@ object UserApiResponseParser {
         )
     }
 
+    fun parseCurrentUserProfile(responseBody: String): UserProfile {
+        val profile = JSONObject(responseBody).getJSONObject("data")
+        return profile.toUserProfile()
+    }
+
     fun parseAvatarUrl(responseBody: String): String? =
         JSONObject(responseBody)
             .getJSONObject("data")
@@ -44,6 +50,20 @@ object UserApiResponseParser {
             username = requiredString("username"),
             remoteProfilePictureUrl = optionalString("avatar_url"),
             localProfilePicturePath = null,
+        )
+
+    private fun JSONObject.toUserProfile(): UserProfile =
+        UserProfile(
+            userId = requiredString("userId"),
+            username = requiredString("username"),
+            avatarUrl = optionalString("avatarUrl"),
+            description = optionalString("description").orEmpty(),
+            privacy = optionalString("privacy") ?: UserProfile.DEFAULT_PRIVACY,
+            showPhone = optBoolean("showPhone", false),
+            showEmail = optBoolean("showEmail", false),
+            showStatus = optBoolean("showStatus", false),
+            showDescription = optBoolean("showDescription", false),
+            allowGroupInvites = optBoolean("allowGroupInvites", false),
         )
 
     private fun JSONObject.requiredString(name: String): String =

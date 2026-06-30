@@ -6,12 +6,14 @@ import com.citruschat.citrusmobile.data.local.dao.UserDao
 import com.citruschat.citrusmobile.data.local.entity.ChatListItemEntity
 import com.citruschat.citrusmobile.data.local.entity.ChatParticipantCrossRef
 import com.citruschat.citrusmobile.data.local.entity.type.ChatType
+import com.citruschat.citrusmobile.data.mapper.toDetails
 import com.citruschat.citrusmobile.data.mapper.toEntity
 import com.citruschat.citrusmobile.data.mapper.toParticipantRefs
 import com.citruschat.citrusmobile.data.mapper.toSummary
 import com.citruschat.citrusmobile.data.user.UserAvatarLocalDataSource
 import com.citruschat.citrusmobile.data.user.UserRemoteDataSource
 import com.citruschat.citrusmobile.domain.model.Chat
+import com.citruschat.citrusmobile.domain.model.ChatDetails
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +43,18 @@ class ChatRepositoryImpl
                     val summary = repairedEntity.toSummary(currentUser?.id)
                     summary.withResolvedAvatar(currentUser?.id)
                 }
-            }
+                }
+
+        override fun observeChatDetails(chatId: Long): Flow<ChatDetails?> =
+            combine(
+                dao.observeItem(chatId),
+                userDao.observeCurrentUser(),
+            ) { item, currentUser ->
+                    val currentUserId = currentUser?.id
+                    item
+                        ?.withRepairedDirectParticipant(currentUserId)
+                        ?.toDetails(currentUserId)
+                }
 
         override suspend fun findDirectChatId(participantUserIds: List<String>): Long? {
             val distinctParticipantIds = participantUserIds.distinct()

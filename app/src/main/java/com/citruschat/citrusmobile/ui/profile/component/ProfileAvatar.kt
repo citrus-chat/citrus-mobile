@@ -28,25 +28,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.citruschat.citrusmobile.R
-import com.citruschat.citrusmobile.domain.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
 fun ProfileAvatar(
-    user: User?,
+    username: String?,
     avatarLocalPath: String?,
     isUploading: Boolean,
     onClick: () -> Unit,
 ) {
     val initial =
-        user
-            ?.username
+        username
             ?.trim()
             ?.firstOrNull()
             ?.uppercaseChar()
             ?.toString()
-            ?: "?"
+            ?: stringResource(R.string.profile_avatar_unknown_initial)
 
     Box(modifier = Modifier.size(88.dp)) {
         Surface(

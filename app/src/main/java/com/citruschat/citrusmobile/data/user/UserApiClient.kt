@@ -3,6 +3,7 @@ package com.citruschat.citrusmobile.data.user
 import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.auth.TokenStore
 import com.citruschat.citrusmobile.domain.model.User
+import com.citruschat.citrusmobile.domain.model.UserProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
@@ -13,6 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
+import org.json.JSONObject
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,6 +31,7 @@ class UserApiClient
         private val apiBaseUrl = baseUrl.trimEnd('/')
         private val usersUrl = "$apiBaseUrl/api/v1/users"
         private val currentUserUrl = "$apiBaseUrl/api/v1/auth/me"
+        private val currentUserProfileUrl = "$apiBaseUrl/api/v1/users/me/profile"
         private val currentUserAvatarUrl = "$apiBaseUrl/api/v1/users/me/avatar"
         private val userAvatarsUrl = "$apiBaseUrl/api/v1/users/avatars"
 
@@ -91,6 +94,85 @@ class UserApiClient
                     null
                 } catch (t: JSONException) {
                     logger.e(TAG, "Current user parse failure", t)
+                    null
+                }
+            }
+
+        override suspend fun getCurrentUserProfile(): UserProfile? =
+            withContext(Dispatchers.IO) {
+                try {
+                    val currentUser = fetchCurrentUserForProfile() ?: return@withContext null
+                    val profile = fetchCurrentUserProfile() ?: return@withContext null
+
+                    if (profile.userId != currentUser.id) {
+                        logger.w(TAG, "Current user profile id mismatch userId=${currentUser.id} profileUserId=${profile.userId}")
+                        return@withContext null
+                    }
+
+                    profile.copy(
+                        email = currentUser.email,
+                        avatarUrl = profile.avatarUrl ?: currentUser.remoteProfilePictureUrl,
+                    )
+                } catch (t: IOException) {
+                    logger.e(TAG, "Current user profile network failure", t)
+                    null
+                } catch (t: JSONException) {
+                    logger.e(TAG, "Current user profile parse failure", t)
+                    null
+                }
+            }
+
+        private suspend fun fetchCurrentUserForProfile(): User? {
+            okHttpClient.newCall(authorizedRequest(currentUserUrl).get().build()).execute().use { response ->
+                val body = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    logger.w(TAG, "Current user profile account request failed with code=${response.code}")
+                    return null
+                }
+
+                return UserApiResponseParser.parseCurrentUser(body)
+            }
+        }
+
+        private suspend fun fetchCurrentUserProfile(): UserProfile? {
+            okHttpClient.newCall(authorizedRequest(currentUserProfileUrl).get().build()).execute().use { response ->
+                val body = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    logger.w(TAG, "Current user profile request failed with code=${response.code}")
+                    return null
+                }
+
+                return UserApiResponseParser.parseCurrentUserProfile(body)
+            }
+        }
+
+        override suspend fun updateCurrentUserProfile(profile: UserProfile): UserProfile? =
+            withContext(Dispatchers.IO) {
+                try {
+                    val requestBody =
+                        profile
+                            .toUpdateJson()
+                            .toString()
+                            .toRequestBody(JSON_MEDIA_TYPE)
+
+                    okHttpClient.newCall(authorizedRequest(currentUserProfileUrl).put(requestBody).build()).execute().use { response ->
+                        val body = response.body?.string().orEmpty()
+                        if (!response.isSuccessful) {
+                            logger.w(TAG, "Current user profile update failed with code=${response.code}")
+                            return@withContext null
+                        }
+
+                        val updatedProfile = UserApiResponseParser.parseCurrentUserProfile(body)
+                        updatedProfile.copy(
+                            email = profile.email,
+                            avatarUrl = updatedProfile.avatarUrl ?: profile.avatarUrl,
+                        )
+                    }
+                } catch (t: IOException) {
+                    logger.e(TAG, "Current user profile update network failure", t)
+                    null
+                } catch (t: JSONException) {
+                    logger.e(TAG, "Current user profile update parse failure", t)
                     null
                 }
             }
@@ -172,7 +254,19 @@ class UserApiClient
             return requestBuilder
         }
 
+        private fun UserProfile.toUpdateJson(): JSONObject =
+            JSONObject()
+                .put("username", username)
+                .put("description", description.take(UserProfile.MAX_DESCRIPTION_LENGTH))
+                .put("privacy", privacy.ifBlank { UserProfile.DEFAULT_PRIVACY })
+                .put("showPhone", showPhone)
+                .put("showEmail", showEmail)
+                .put("showStatus", showStatus)
+                .put("showDescription", showDescription)
+                .put("allowGroupInvites", allowGroupInvites)
+
         private companion object {
+            val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
             const val DEFAULT_AVATAR_FILE_NAME = "avatar"
             const val TAG = "UserApiClient"
         }

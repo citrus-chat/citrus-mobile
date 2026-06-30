@@ -3,8 +3,10 @@ package com.citruschat.citrusmobile.ui.home
 import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 import com.citruschat.citrusmobile.domain.model.Chat
+import com.citruschat.citrusmobile.domain.model.ChatDetails
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import com.citruschat.citrusmobile.domain.model.User
+import com.citruschat.citrusmobile.domain.model.UserProfile
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
 import com.citruschat.citrusmobile.domain.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
@@ -112,6 +114,8 @@ private class FakeChatRepository(
         return chats
     }
 
+    override fun observeChatDetails(chatId: Long): Flow<ChatDetails?> = MutableStateFlow(null)
+
     override suspend fun findDirectChatId(participantUserIds: List<String>): Long? {
         directChatLookups += participantUserIds
         return existingDirectChatId
@@ -145,6 +149,10 @@ private class FakeUserRepository(
     }
 
     override suspend fun refreshCurrentUser(): User? = currentUserState.value
+
+    override suspend fun getCurrentUserProfile(): UserProfile? = null
+
+    override suspend fun updateCurrentUserProfile(profile: UserProfile): UserProfile? = profile
 
     override suspend fun getAvatarLocalPath(user: User): String? = user.localProfilePicturePath
 

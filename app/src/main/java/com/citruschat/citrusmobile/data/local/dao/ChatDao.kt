@@ -94,4 +94,21 @@ interface ChatDao {
         """,
     )
     fun observeItems(searchQuery: String): Flow<List<ChatListItemEntity>>
+
+    @Transaction
+    @Query(
+        """
+        SELECT
+            chats.id,
+            chats.name,
+            chats.lastMessageId,
+            chats.localProfilePicturePath,
+            chats.remoteProfilePictureUrl,
+            chats.type
+        FROM chats
+        WHERE chats.id = :chatId
+        LIMIT 1
+        """,
+    )
+    fun observeItem(chatId: Long): Flow<ChatListItemEntity?>
 }

@@ -1,6 +1,7 @@
 package com.citruschat.citrusmobile.data.user
 
 import com.citruschat.citrusmobile.domain.model.User
+import com.citruschat.citrusmobile.domain.model.UserProfile
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -61,6 +62,45 @@ class UserApiResponseParserTest {
                 isCurrentUser = true,
             ),
             user,
+        )
+    }
+
+    @Test
+    fun `parses current user profile response`() {
+        val profile =
+            UserApiResponseParser.parseCurrentUserProfile(
+                """
+                {
+                  "data": {
+                    "userId": "user-1",
+                    "username": "ada",
+                    "avatarUrl": "http://localhost:8200/api/v1/users/avatars/avatar.png",
+                    "description": "Hello",
+                    "privacy": "contacts",
+                    "showPhone": true,
+                    "showEmail": true,
+                    "showStatus": false,
+                    "showDescription": true,
+                    "allowGroupInvites": true
+                  }
+                }
+                """.trimIndent(),
+            )
+
+        assertEquals(
+            UserProfile(
+                userId = "user-1",
+                username = "ada",
+                avatarUrl = "http://localhost:8200/api/v1/users/avatars/avatar.png",
+                description = "Hello",
+                privacy = "contacts",
+                showPhone = true,
+                showEmail = true,
+                showStatus = false,
+                showDescription = true,
+                allowGroupInvites = true,
+            ),
+            profile,
         )
     }
 

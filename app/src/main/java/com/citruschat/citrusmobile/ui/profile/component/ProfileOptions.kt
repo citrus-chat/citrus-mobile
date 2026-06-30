@@ -25,16 +25,59 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.citruschat.citrusmobile.R
+import com.citruschat.citrusmobile.domain.model.UserProfile
 
 @Composable
 fun ProfileOptions(
+    profile: UserProfile?,
     isDarkTheme: Boolean,
     isLoggingOut: Boolean,
+    isProfileSaving: Boolean,
+    onShowPhoneChange: (Boolean) -> Unit,
+    onShowEmailChange: (Boolean) -> Unit,
+    onShowStatusChange: (Boolean) -> Unit,
+    onShowDescriptionChange: (Boolean) -> Unit,
+    onAllowGroupInvitesChange: (Boolean) -> Unit,
     onDarkThemeChange: (Boolean) -> Unit,
     onConnectedDevicesClick: () -> Unit,
     onLogoutClick: () -> Unit,
 ) {
+    val profileSwitchesEnabled = profile != null && !isProfileSaving
+
     Column(modifier = Modifier.fillMaxWidth()) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        ProfileSwitchRow(
+            label = stringResource(R.string.profile_show_phone),
+            checked = profile?.showPhone ?: false,
+            enabled = profileSwitchesEnabled,
+            onCheckedChange = onShowPhoneChange,
+        )
+        ProfileSwitchRow(
+            label = stringResource(R.string.profile_show_email),
+            checked = profile?.showEmail ?: false,
+            enabled = profileSwitchesEnabled,
+            onCheckedChange = onShowEmailChange,
+        )
+        ProfileSwitchRow(
+            label = stringResource(R.string.profile_show_status),
+            checked = profile?.showStatus ?: false,
+            enabled = profileSwitchesEnabled,
+            onCheckedChange = onShowStatusChange,
+        )
+        ProfileSwitchRow(
+            label = stringResource(R.string.profile_show_description),
+            checked = profile?.showDescription ?: false,
+            enabled = profileSwitchesEnabled,
+            onCheckedChange = onShowDescriptionChange,
+        )
+        ProfileSwitchRow(
+            label = stringResource(R.string.profile_allow_group_invites),
+            checked = profile?.allowGroupInvites ?: false,
+            enabled = profileSwitchesEnabled,
+            onCheckedChange = onAllowGroupInvitesChange,
+        )
+
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         Row(
@@ -101,5 +144,34 @@ fun ProfileOptions(
                     },
             )
         }
+    }
+}
+
+@Composable
+private fun ProfileSwitchRow(
+    label: String,
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Switch(
+            checked = checked,
+            enabled = enabled,
+            onCheckedChange = onCheckedChange,
+        )
     }
 }

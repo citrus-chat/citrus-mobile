@@ -17,17 +17,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.citruschat.citrusmobile.R
-import com.citruschat.citrusmobile.ui.chat.ChatViewModel
+import com.citruschat.citrusmobile.domain.model.ChatParticipant
 import com.citruschat.citrusmobile.ui.chat.component.ChatInput
+import com.citruschat.citrusmobile.ui.chat.component.ChatHeader
 import com.citruschat.citrusmobile.ui.chat.component.MessageBubble
 
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
-    isInGroup: Boolean = false,
+    onOpenChatProfile: () -> Unit,
     viewModel: ChatViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isInGroup = uiState.chat?.isGroup == true
 
     Column(
         modifier =
@@ -36,6 +38,11 @@ fun ChatScreen(
                 .imePadding()
                 .background(MaterialTheme.colorScheme.background),
     ) {
+        ChatHeader(
+            chat = uiState.chat,
+            onClick = onOpenChatProfile,
+        )
+
         LazyColumn(
             modifier =
                 Modifier
@@ -44,7 +51,11 @@ fun ChatScreen(
             contentPadding = PaddingValues(vertical = dimensionResource(R.dimen.padding_small)),
         ) {
             itemsIndexed(uiState.messages, key = { _, msg -> msg.id }) { _, msg ->
-                MessageBubble(message = msg, isInGroup = isInGroup)
+                MessageBubble(
+                    message = msg,
+                    isInGroup = isInGroup,
+                    senderAvatarLocalPath = uiState.chat?.participants?.avatarFor(messageUser = msg.user),
+                )
             }
         }
 
@@ -59,3 +70,8 @@ fun ChatScreen(
         )
     }
 }
+
+private fun List<ChatParticipant>.avatarFor(messageUser: String): String? =
+    firstOrNull { participant ->
+        participant.username.equals(messageUser, ignoreCase = true)
+    }?.localProfilePicturePath

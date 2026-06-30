@@ -11,7 +11,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,24 +69,38 @@ fun ProfileScreen(
             Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 24.dp),
     ) {
         ProfileHeader(
-            user = uiState.user,
+            profile = uiState.profile,
             avatarLocalPath = uiState.avatarLocalPath,
             isAvatarUploading = uiState.isAvatarUploading,
+            description = uiState.description,
+            isProfileSaving = uiState.isProfileSaving,
+            onDescriptionChange = viewModel::setDescription,
+            onDescriptionSave = viewModel::saveDescription,
             onAvatarClick = { avatarPicker.launch("image/*") },
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(24.dp))
 
         ProfileOptions(
+            profile = uiState.profile,
             isDarkTheme = uiState.isDarkTheme,
             isLoggingOut = uiState.isLoggingOut,
+            isProfileSaving = uiState.isProfileSaving,
+            onShowPhoneChange = viewModel::setShowPhone,
+            onShowEmailChange = viewModel::setShowEmail,
+            onShowStatusChange = viewModel::setShowStatus,
+            onShowDescriptionChange = viewModel::setShowDescription,
+            onAllowGroupInvitesChange = viewModel::setAllowGroupInvites,
             onDarkThemeChange = viewModel::setDarkTheme,
             onConnectedDevicesClick = onConnectedDevicesClick,
             onLogoutClick = viewModel::logout,
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

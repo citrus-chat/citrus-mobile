@@ -37,9 +37,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.9:8200/\"")
-        buildConfigField("String", "WS_BASE_URL", "\"wss://api.citruschat.com/\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.10:8200/\"")
+        buildConfigField("String", "WS_BASE_URL", "\"ws://192.168.1.10:8200/\"")
     }
 
     buildTypes {

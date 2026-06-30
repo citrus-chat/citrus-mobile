@@ -1,6 +1,7 @@
 package com.citruschat.citrusmobile.domain.repository
 
 import com.citruschat.citrusmobile.domain.model.User
+import com.citruschat.citrusmobile.domain.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
@@ -9,6 +10,10 @@ interface UserRepository {
     suspend fun searchUsers(query: String): List<User>
 
     suspend fun refreshCurrentUser(): User?
+
+    suspend fun getCurrentUserProfile(): UserProfile?
+
+    suspend fun updateCurrentUserProfile(profile: UserProfile): UserProfile?
 
     suspend fun getAvatarLocalPath(user: User): String?
 

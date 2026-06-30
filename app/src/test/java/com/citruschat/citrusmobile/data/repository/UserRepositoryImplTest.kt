@@ -6,6 +6,7 @@ import com.citruschat.citrusmobile.data.local.entity.UserEntity
 import com.citruschat.citrusmobile.data.user.UserAvatarLocalDataSource
 import com.citruschat.citrusmobile.data.user.UserRemoteDataSource
 import com.citruschat.citrusmobile.domain.model.User
+import com.citruschat.citrusmobile.domain.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -169,6 +170,10 @@ private class FakeUserRemoteDataSource(
     }
 
     override suspend fun getCurrentUser(): User? = currentUser
+
+    override suspend fun getCurrentUserProfile(): UserProfile? = null
+
+    override suspend fun updateCurrentUserProfile(profile: UserProfile): UserProfile? = profile
 
     override suspend fun downloadAvatar(filename: String): ByteArray? {
         downloadedAvatarFilenames += filename

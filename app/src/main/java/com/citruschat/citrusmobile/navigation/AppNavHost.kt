@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.citruschat.citrusmobile.core.logging.Logger
+import com.citruschat.citrusmobile.ui.chat.ChatProfileScreen
 import com.citruschat.citrusmobile.ui.chat.ChatScreen
 import com.citruschat.citrusmobile.ui.devices.ConnectedDevicesScreen
 import com.citruschat.citrusmobile.ui.devices.DeviceQrScannerScreen
@@ -76,8 +77,24 @@ fun AppNavHost(logger: Logger) {
         composable(
             route = Routes.Chat,
             arguments = listOf(navArgument("chatId") { type = NavType.LongType }),
+        ) { backStackEntry ->
+            val chatId = checkNotNull(backStackEntry.arguments?.getLong("chatId"))
+            ChatScreen(
+                onOpenChatProfile = {
+                    navController.navigate(Routes.chatProfile(chatId))
+                },
+            )
+        }
+
+        composable(
+            route = Routes.ChatProfile,
+            arguments = listOf(navArgument("chatId") { type = NavType.LongType }),
         ) {
-            ChatScreen()
+            ChatProfileScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+            )
         }
     }
 }

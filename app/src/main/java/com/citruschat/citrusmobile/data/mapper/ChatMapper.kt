@@ -5,7 +5,9 @@ import com.citruschat.citrusmobile.data.local.entity.ChatListItemEntity
 import com.citruschat.citrusmobile.data.local.entity.ChatParticipantCrossRef
 import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 import com.citruschat.citrusmobile.domain.model.Chat
+import com.citruschat.citrusmobile.domain.model.ChatDetails
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
+import com.citruschat.citrusmobile.domain.model.ChatParticipant
 import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 
 fun ChatEntity.toDomain(participantUserIds: List<String> = emptyList()) =
@@ -51,6 +53,28 @@ fun ChatListItemEntity.toSummary(currentUserId: String?) =
         participantUsernames = participants.map { it.username },
         participantAvatarUrls = participants.map { it.localProfilePicturePath },
         lastMessageStatus = lastMessage?.deliveryStatus?.toMessageDeliveryStatus(),
+    )
+
+fun ChatListItemEntity.toDetails(currentUserId: String?) =
+    ChatDetails(
+        id = chat.id,
+        name = displayName(currentUserId),
+        type = chat.type,
+        localProfilePicturePath = localProfilePicturePath(currentUserId),
+        remoteProfilePictureUrl = remoteProfilePictureUrl(currentUserId),
+        participants =
+            participants.map { participant ->
+                ChatParticipant(
+                    id = participant.id,
+                    email = participant.email,
+                    username = participant.username,
+                    remoteProfilePictureUrl = participant.remoteProfilePictureUrl,
+                    localProfilePicturePath = participant.localProfilePicturePath,
+                    statusMessage = participant.statusMessage,
+                    createdAt = participant.createdAt,
+                    isCurrentUser = participant.isCurrentUser,
+                )
+            },
     )
 
 private fun ChatListItemEntity.displayName(currentUserId: String?): String =

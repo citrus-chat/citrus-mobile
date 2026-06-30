@@ -7,23 +7,33 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.citruschat.citrusmobile.R
 import com.citruschat.citrusmobile.domain.model.Message
+import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -33,6 +43,7 @@ fun MessageBubble(
     modifier: Modifier = Modifier,
     message: Message,
     isInGroup: Boolean = false,
+    senderAvatarLocalPath: String? = null,
     bubbleMaxWidth: Dp = 280.dp,
 ) {
     val bubbleColor: Color =
@@ -46,7 +57,6 @@ fun MessageBubble(
         else
             MaterialTheme.colorScheme.onSurfaceVariant
 
-    // Una row para alinear el mensaje a la derecha o izquierda dependiendo de si es propio o no
     Row(
         modifier =
             modifier.fillMaxWidth().padding(
@@ -54,8 +64,17 @@ fun MessageBubble(
                 horizontal = dimensionResource(R.dimen.padding_medium),
             ),
         horizontalArrangement = if (message.isOwn) Arrangement.End else Arrangement.Start,
+        verticalAlignment = Alignment.Bottom,
     ) {
-        // Un card para el mensaje con bordes redondeados y un color de fondo diferente para mensajes propios y ajenos
+        if (isInGroup && !message.isOwn) {
+            ChatAvatar(
+                name = message.user,
+                avatarLocalPath = senderAvatarLocalPath,
+                size = 32.dp,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
         Card(
             shape =
                 RoundedCornerShape(
@@ -77,8 +96,6 @@ fun MessageBubble(
             Column(
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
             ) {
-                // Si el mensaje es parte de un grupo y no es propio,
-                // mostramos el nombre del usuario encima del mensaje
                 if (isInGroup && !message.isOwn) {
                     Text(
                         text = message.user,
@@ -90,27 +107,68 @@ fun MessageBubble(
                     Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_small)))
                 }
 
-                // El texto del mensaje
                 Text(
                     text = message.text,
                     style = MaterialTheme.typography.bodyMedium,
                 )
 
-                // La hora del mensaje en formato simple debajo del texto
                 val timeText =
                     Instant
                         .ofEpochMilli(message.timestamp)
                         .atZone(ZoneId.systemDefault())
                         .format(DateTimeFormatter.ofPattern("HH:mm"))
-                Text(
-                    text = timeText,
-                    style = MaterialTheme.typography.labelSmall,
+
+                Row(
                     modifier =
                         Modifier
                             .align(Alignment.End)
                             .padding(top = dimensionResource(R.dimen.padding_xsmall)),
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = timeText,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    MessageStatus(status = message.deliveryStatus)
+                }
             }
         }
     }
 }
+
+@Composable
+private fun MessageStatus(status: MessageDeliveryStatus) {
+    Icon(
+        imageVector = status.icon(),
+        contentDescription = status.label(),
+        tint = status.tint(),
+        modifier = Modifier.size(15.dp),
+    )
+}
+
+@Composable
+private fun MessageDeliveryStatus.tint(): Color =
+    when (this) {
+        MessageDeliveryStatus.VIEWED -> MaterialTheme.colorScheme.tertiary
+        MessageDeliveryStatus.FAILED -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+private fun MessageDeliveryStatus.icon(): ImageVector =
+    when (this) {
+        MessageDeliveryStatus.SENDING -> Icons.Default.Schedule
+        MessageDeliveryStatus.SENT -> Icons.Default.Done
+        MessageDeliveryStatus.DELIVERED -> Icons.Default.DoneAll
+        MessageDeliveryStatus.VIEWED -> Icons.Default.DoneAll
+        MessageDeliveryStatus.FAILED -> Icons.Default.ErrorOutline
+    }
+
+private fun MessageDeliveryStatus.label(): String =
+    when (this) {
+        MessageDeliveryStatus.SENDING -> "Sending"
+        MessageDeliveryStatus.SENT -> "Sent"
+        MessageDeliveryStatus.DELIVERED -> "Delivered"
+        MessageDeliveryStatus.VIEWED -> "Viewed"
+        MessageDeliveryStatus.FAILED -> "Failed"
+    }

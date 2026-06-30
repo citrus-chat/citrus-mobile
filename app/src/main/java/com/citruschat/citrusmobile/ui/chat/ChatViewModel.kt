@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.citruschat.citrusmobile.core.logging.Logger
 import com.citruschat.citrusmobile.domain.model.Message
+import com.citruschat.citrusmobile.domain.repository.ChatRepository
 import com.citruschat.citrusmobile.domain.repository.MessageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class ChatViewModel
     @Inject
     constructor(
-        private val repository: MessageRepository,
+        private val messageRepository: MessageRepository,
+        chatRepository: ChatRepository,
         private val logger: Logger,
         savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
@@ -29,7 +31,7 @@ class ChatViewModel
         val inputText = _inputText.asStateFlow()
 
         val messages: StateFlow<List<Message>> =
-            repository
+            messageRepository
                 .observeMessages(chatId)
                 .stateIn(
                     scope = viewModelScope,
@@ -37,11 +39,17 @@ class ChatViewModel
                     initialValue = emptyList(),
                 )
 
+        private val chat =
+            chatRepository
+                .observeChatDetails(chatId)
+
         val uiState: StateFlow<ChatUiState> =
-            combine(messages, inputText) { messages, input ->
+            combine(chat, messages, inputText) { chat, messages, input ->
                 ChatUiState(
+                    chat = chat,
                     messages = messages,
                     inputText = input,
+                    isLoading = chat == null,
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -75,7 +83,7 @@ class ChatViewModel
                         chatId = chatId,
                     )
                 logger.d(TAG, "Sending message to chatId=$chatId textLength=${text.length}")
-                repository.sendMessage(newMessage)
+                messageRepository.sendMessage(newMessage)
                 _inputText.value = ""
                 logger.i(TAG, "Message sent to chatId=$chatId")
             }

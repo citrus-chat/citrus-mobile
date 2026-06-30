@@ -7,6 +7,7 @@ import com.citruschat.citrusmobile.data.mapper.toEntity
 import com.citruschat.citrusmobile.data.user.UserAvatarLocalDataSource
 import com.citruschat.citrusmobile.data.user.UserRemoteDataSource
 import com.citruschat.citrusmobile.domain.model.User
+import com.citruschat.citrusmobile.domain.model.UserProfile
 import com.citruschat.citrusmobile.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -46,6 +47,18 @@ class UserRepositoryImpl
                 )
             saveCurrentUser(mergedUser)
             return mergedUser
+        }
+
+        override suspend fun getCurrentUserProfile(): UserProfile? {
+            val profile = userRemoteDataSource.getCurrentUserProfile() ?: return null
+            mergeCurrentUserProfile(profile)
+            return profile
+        }
+
+        override suspend fun updateCurrentUserProfile(profile: UserProfile): UserProfile? {
+            val updatedProfile = userRemoteDataSource.updateCurrentUserProfile(profile) ?: return null
+            mergeCurrentUserProfile(updatedProfile)
+            return updatedProfile
         }
 
         override suspend fun getAvatarLocalPath(user: User): String? {
@@ -95,10 +108,7 @@ class UserRepositoryImpl
                 avatarLocalDataSource.saveAvatar(remoteAvatarUrl, bytes)
                     ?: return null
 
-            val currentUser =
-                observeCurrentUser().firstOrNull()
-                    ?: refreshCurrentUser()
-                    ?: return null
+            val currentUser = observeCurrentUser().firstOrNull() ?: return null
 
             val updatedUser =
                 currentUser.copy(
@@ -154,6 +164,18 @@ class UserRepositoryImpl
         override suspend fun clearCurrentUser() {
             logger.i(TAG, "Clearing current user flag")
             dao.clearCurrentUserFlag()
+        }
+
+        private suspend fun mergeCurrentUserProfile(profile: UserProfile) {
+            val currentUser = observeCurrentUser().firstOrNull() ?: return
+            if (currentUser.id != profile.userId) return
+
+            saveCurrentUser(
+                currentUser.copy(
+                    username = profile.username,
+                    remoteProfilePictureUrl = profile.avatarUrl ?: currentUser.remoteProfilePictureUrl,
+                ),
+            )
         }
 
         private suspend fun User.resolveLocalProfilePicturePath(existingUser: User?): String? {
