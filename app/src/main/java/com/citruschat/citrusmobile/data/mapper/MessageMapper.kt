@@ -7,6 +7,7 @@ import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 fun MessageEntity.toDomain() =
     Message(
         id = id,
+        remoteId = remoteId,
         user = user,
         text = text,
         isOwn = isOwn,
@@ -18,6 +19,7 @@ fun MessageEntity.toDomain() =
 fun Message.toEntity() =
     MessageEntity(
         id = id,
+        remoteId = remoteId,
         user = user,
         text = text,
         isOwn = isOwn,

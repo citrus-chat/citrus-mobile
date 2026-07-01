@@ -13,6 +13,7 @@ import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
 fun ChatEntity.toDomain(participantUserIds: List<String> = emptyList()) =
     Chat(
         id = id,
+        remoteId = remoteId,
         name = name,
         lastMessageId = lastMessageId,
         participantUserIds = participantUserIds,
@@ -24,6 +25,7 @@ fun ChatEntity.toDomain(participantUserIds: List<String> = emptyList()) =
 fun Chat.toEntity() =
     ChatEntity(
         id = id,
+        remoteId = remoteId,
         name = name,
         lastMessageId = lastMessageId,
         remoteProfilePictureUrl =
@@ -44,6 +46,7 @@ fun Chat.toParticipantRefs(chatId: Long = id): List<ChatParticipantCrossRef> =
 fun ChatListItemEntity.toSummary(currentUserId: String?) =
     ChatListItemSummary(
         id = chat.id,
+        remoteId = chat.remoteId,
         name = displayName(currentUserId),
         type = chat.type,
         lastMessagePreview = lastMessage?.text,
@@ -53,11 +56,13 @@ fun ChatListItemEntity.toSummary(currentUserId: String?) =
         participantUsernames = participants.map { it.username },
         participantAvatarUrls = participants.map { it.localProfilePicturePath },
         lastMessageStatus = lastMessage?.deliveryStatus?.toMessageDeliveryStatus(),
+        unreadCount = readState?.unreadCount ?: 0,
     )
 
 fun ChatListItemEntity.toDetails(currentUserId: String?) =
     ChatDetails(
         id = chat.id,
+        remoteId = chat.remoteId,
         name = displayName(currentUserId),
         type = chat.type,
         localProfilePicturePath = localProfilePicturePath(currentUserId),
@@ -75,6 +80,7 @@ fun ChatListItemEntity.toDetails(currentUserId: String?) =
                     isCurrentUser = participant.isCurrentUser,
                 )
             },
+        firstUnreadMessageId = readState?.firstUnreadMessageId,
     )
 
 private fun ChatListItemEntity.displayName(currentUserId: String?): String =

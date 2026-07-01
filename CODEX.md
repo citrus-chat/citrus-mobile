@@ -103,26 +103,6 @@ Current top-level flows:
 - `ProfileScreen` shows current-user/profile and theme/logout actions.
 - `ConnectedDevicesScreen` and `DeviceQrScannerScreen` handle device flows.
 
-## Navigation
-
-Routes are centralized in `navigation/Routes.kt`. The graph is defined in
-`navigation/AppNavHost.kt`.
-
-Current route constants include:
-
-- `Routes.Splash`
-- `Routes.Login`
-- `Routes.Main`
-- `Routes.Home`
-- `Routes.Chat` with `chatId`
-- `Routes.Profile`
-- `Routes.ConnectedDevices`
-- `Routes.DeviceQrScanner`
-
-Use helper functions for parameterized routes, such as `Routes.chat(chatId)`.
-Keep route strings centralized; do not duplicate literal route strings in
-screens.
-
 ## Auth And Session State
 
 Auth behavior is split across:
@@ -242,54 +222,6 @@ Home search behavior:
 
 Preserve this debounce and minimum-length gate unless the user explicitly asks
 to change the product behavior.
-
-## Local Persistence
-
-Room is configured in:
-
-- `data/local/database/AppDatabase.kt`
-- `data/di/DatabaseModule.kt`
-
-Database name: `citrus.db`
-
-Current schema version: `5`
-
-Entities:
-
-- `MessageEntity`
-- `ChatEntity`
-- `ChatParticipantCrossRef`
-- `UserEntity`
-
-DAOs:
-
-- `MessageDao`
-- `ChatDao`
-- `UserDao`
-
-Current migrations:
-
-- `MIGRATION_2_3`: creates `users`.
-- `MIGRATION_3_4`: creates `chat_participants` and indexes.
-- `MIGRATION_4_5`: adds `messages.deliveryStatus`.
-
-Rules for persistence changes:
-
-- Any entity schema change must bump `AppDatabase` version.
-- Add a Room migration in `DatabaseModule`.
-- Keep entity, DAO, mapper, repository, and tests in sync.
-- Prefer DAO queries/relations over reconstructing persisted relationships in
-  UI code.
-- Do not use destructive migrations unless explicitly requested.
-
-Chat storage notes:
-
-- Chat participants are represented by `chat_participants`.
-- Direct chat lookup uses exact distinct participant ids and participant count.
-- Chat list summaries should include chat, last message, and participants so UI
-  search and direct-chat creation agree.
-- `MessageRepositoryImpl.sendMessage` persists messages locally and marks the
-  last message through DAO behavior.
 
 ## Realtime Chat
 
@@ -459,18 +391,3 @@ Before changing request/response behavior:
 If network access or backend docs are unavailable, state the assumption clearly
 in the final response and keep changes isolated behind parsers or data-source
 interfaces.
-
-## Git And Workflow Notes
-
-The README asks contributors to:
-
-- Configure hooks with `git config core.hooksPath hooks/`.
-- Avoid working directly on `main`.
-
-For Codex work:
-
-- Check `git status --short` before editing.
-- Do not revert user changes unless explicitly asked.
-- Keep generated or mechanical changes out of unrelated files.
-- When recreating deleted files, inspect the last committed version when useful
-  and update it to current code rather than restoring stale content blindly.

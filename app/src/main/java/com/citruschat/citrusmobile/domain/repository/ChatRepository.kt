@@ -14,5 +14,7 @@ interface ChatRepository {
 
     suspend fun createChat(chat: Chat): Long
 
+    suspend fun syncChats()
+
     suspend fun deleteChat(chatId: Long)
 }

@@ -49,6 +49,7 @@ class EncryptedPrefsDeviceIdentityProvider
                     deviceName = deviceName(),
                     deviceType = DEVICE_TYPE_MOBILE,
                     publicKey = keyPair.publicKey,
+                    privateKey = keyPair.privateKey,
                 )
             val encryptedPrivateKey = encrypt(keyPair.privateKey)
 
@@ -109,6 +110,7 @@ class EncryptedPrefsDeviceIdentityProvider
                     deviceName = deviceName,
                     deviceType = deviceType,
                     publicKey = publicKey,
+                    privateKey = decrypt(encryptedPrivateKey, privateKeyIv),
                 )
             } catch (e: GeneralSecurityException) {
                 logger.e(TAG, "Failed to load local device identity", e)

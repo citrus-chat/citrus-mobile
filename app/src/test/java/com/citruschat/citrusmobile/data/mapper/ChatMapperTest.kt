@@ -3,6 +3,7 @@ package com.citruschat.citrusmobile.data.mapper
 import com.citruschat.citrusmobile.data.local.entity.ChatEntity
 import com.citruschat.citrusmobile.data.local.entity.ChatListItemEntity
 import com.citruschat.citrusmobile.data.local.entity.ChatParticipantCrossRef
+import com.citruschat.citrusmobile.data.local.entity.ChatReadStateEntity
 import com.citruschat.citrusmobile.data.local.entity.MessageEntity
 import com.citruschat.citrusmobile.data.local.entity.UserEntity
 import com.citruschat.citrusmobile.data.local.entity.type.ChatType
@@ -95,6 +96,7 @@ class ChatMapperTest {
         val listItem =
             ChatListItemEntity(
                 chat = ChatEntity(id = 3, name = "Project", type = ChatType.DIRECT, lastMessageId = 44),
+                readState = ChatReadStateEntity(chatId = 3, unreadCount = 2),
                 lastMessage =
                     MessageEntity(
                         id = 44,
@@ -138,6 +140,7 @@ class ChatMapperTest {
                 participantUsernames = listOf("me", "grace"),
                 participantAvatarUrls = listOf("/local/me.png", "/local/grace.png"),
                 lastMessageStatus = MessageDeliveryStatus.VIEWED,
+                unreadCount = 2,
             ),
             summary,
         )
@@ -155,6 +158,7 @@ class ChatMapperTest {
                         remoteProfilePictureUrl = "https://example.com/team.png",
                         localProfilePicturePath = "/local/team.png",
                     ),
+                readState = null,
                 lastMessage = null,
             )
 

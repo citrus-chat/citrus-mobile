@@ -21,6 +21,7 @@ import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 data class ChatEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val remoteId: String? = null,
     val type: ChatType = ChatType.DIRECT,
     // For GROUP: real group name
     // For DIRECT: optional cached/display fallback, or empty

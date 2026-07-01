@@ -59,10 +59,18 @@ class ChatViewModel
 
         init {
             logger.i(TAG, "Opened chatId=$chatId")
+            viewModelScope.launch {
+                messageRepository.startRealtime(chatId)
+            }
         }
 
         fun onInputChange(text: String) {
             _inputText.value = text
+        }
+
+        override fun onCleared() {
+            messageRepository.stopRealtime()
+            super.onCleared()
         }
 
         fun sendMessage() {

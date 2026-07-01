@@ -5,4 +5,5 @@ data class DeviceIdentity(
     val deviceName: String,
     val deviceType: String,
     val publicKey: String,
+    val privateKey: String,
 )

@@ -57,10 +57,11 @@ fun ProfileHeader(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = stringResource(
-                    R.string.profile_privacy_value,
-                    stringResource(profile?.privacy.privacyLabelRes()),
-                ),
+                text =
+                    stringResource(
+                        R.string.profile_privacy_value,
+                        stringResource(profile?.privacy.privacyLabelRes()),
+                    ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -75,7 +76,6 @@ fun ProfileHeader(
         label = stringResource(R.string.profile_email),
         value = profile?.email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_unknown_email),
     )
-
 
     OutlinedTextField(
         value = description,

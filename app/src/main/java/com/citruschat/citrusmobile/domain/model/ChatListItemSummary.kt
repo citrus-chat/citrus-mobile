@@ -4,6 +4,7 @@ import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 
 data class ChatListItemSummary(
     val id: Long,
+    val remoteId: String? = null,
     val name: String,
     val type: ChatType = ChatType.DIRECT,
     val lastMessagePreview: String?,
@@ -14,4 +15,5 @@ data class ChatListItemSummary(
     val participantAvatarUrls: List<String?> = emptyList(),
     val lastMessageStatus: MessageDeliveryStatus? = null,
     val activityText: String? = null,
+    val unreadCount: Int = 0,
 )

@@ -6,6 +6,8 @@ import androidx.room.Relation
 
 data class ChatListItemEntity(
     @Embedded val chat: ChatEntity,
+    @Embedded(prefix = "readState_")
+    val readState: ChatReadStateEntity?,
     @Relation(
         parentColumn = "lastMessageId",
         entityColumn = "id",

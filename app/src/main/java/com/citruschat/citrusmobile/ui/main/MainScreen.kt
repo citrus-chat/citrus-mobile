@@ -6,8 +6,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.citruschat.citrusmobile.navigation.Routes
 import com.citruschat.citrusmobile.ui.home.HomeScreen
@@ -19,9 +22,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     navController: NavHostController,
+    viewModel: MainViewModel = hiltViewModel(),
 ) {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val scope = rememberCoroutineScope()
+    val unreadCount by viewModel.unreadCount.collectAsStateWithLifecycle()
 
     Scaffold(
         bottomBar = {
@@ -42,6 +47,7 @@ fun MainScreen(
                         pagerState.animateScrollToPage(1)
                     }
                 },
+                homeUnreadCount = unreadCount,
             )
         },
     ) { padding ->

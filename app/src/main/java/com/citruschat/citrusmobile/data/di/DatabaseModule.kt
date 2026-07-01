@@ -4,11 +4,19 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.citruschat.citrusmobile.app.AppVisibilityTracker
 import com.citruschat.citrusmobile.core.logging.Logger
+import com.citruschat.citrusmobile.data.auth.TokenStore
+import com.citruschat.citrusmobile.data.chat.ChatApiClient
+import com.citruschat.citrusmobile.data.crypto.ConversationCrypto
+import com.citruschat.citrusmobile.data.crypto.ConversationKeyStore
+import com.citruschat.citrusmobile.data.device.DeviceIdentityProvider
 import com.citruschat.citrusmobile.data.local.dao.ChatDao
 import com.citruschat.citrusmobile.data.local.dao.MessageDao
 import com.citruschat.citrusmobile.data.local.dao.UserDao
 import com.citruschat.citrusmobile.data.local.database.AppDatabase
+import com.citruschat.citrusmobile.data.message.MessageApiClient
+import com.citruschat.citrusmobile.data.notification.ChatNotificationNotifier
 import com.citruschat.citrusmobile.data.repository.ChatRepositoryImpl
 import com.citruschat.citrusmobile.data.repository.MessageRepositoryImpl
 import com.citruschat.citrusmobile.data.repository.ThemeRepositoryImpl
@@ -16,6 +24,7 @@ import com.citruschat.citrusmobile.data.repository.UserRepositoryImpl
 import com.citruschat.citrusmobile.data.user.FileUserAvatarLocalDataSource
 import com.citruschat.citrusmobile.data.user.UserAvatarLocalDataSource
 import com.citruschat.citrusmobile.data.user.UserRemoteDataSource
+import com.citruschat.citrusmobile.domain.realtime.ChatRealtimeClient
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
 import com.citruschat.citrusmobile.domain.repository.MessageRepository
 import com.citruschat.citrusmobile.domain.repository.ThemeRepository
@@ -47,6 +56,8 @@ object DatabaseModule {
                 MIGRATION_5_6,
                 MIGRATION_6_7,
                 MIGRATION_7_8,
+                MIGRATION_8_9,
+                MIGRATION_9_10,
             ).build()
 
     @Provides
@@ -56,8 +67,26 @@ object DatabaseModule {
     @Singleton
     fun provideMessageRepository(
         dao: MessageDao,
+        chatDao: ChatDao,
+        userDao: UserDao,
+        tokenStore: TokenStore,
+        messageApiClient: MessageApiClient,
+        realtimeClient: ChatRealtimeClient,
+        notificationNotifier: ChatNotificationNotifier,
+        appVisibilityTracker: AppVisibilityTracker,
         logger: Logger,
-    ): MessageRepository = MessageRepositoryImpl(dao, logger)
+    ): MessageRepository =
+        MessageRepositoryImpl(
+            dao = dao,
+            chatDao = chatDao,
+            userDao = userDao,
+            tokenStore = tokenStore,
+            messageApiClient = messageApiClient,
+            realtimeClient = realtimeClient,
+            notificationNotifier = notificationNotifier,
+            appVisibilityTracker = appVisibilityTracker,
+            logger = logger,
+        )
 
     @Provides
     fun provideChatDao(database: AppDatabase): ChatDao = database.chatDao()
@@ -69,8 +98,23 @@ object DatabaseModule {
         userDao: UserDao,
         userRemoteDataSource: UserRemoteDataSource,
         avatarLocalDataSource: UserAvatarLocalDataSource,
+        chatApiClient: ChatApiClient,
+        deviceIdentityProvider: DeviceIdentityProvider,
+        conversationCrypto: ConversationCrypto,
+        conversationKeyStore: ConversationKeyStore,
         logger: Logger,
-    ): ChatRepository = ChatRepositoryImpl(dao, userDao, userRemoteDataSource, avatarLocalDataSource, logger)
+    ): ChatRepository =
+        ChatRepositoryImpl(
+            dao = dao,
+            userDao = userDao,
+            userRemoteDataSource = userRemoteDataSource,
+            avatarLocalDataSource = avatarLocalDataSource,
+            chatApiClient = chatApiClient,
+            deviceIdentityProvider = deviceIdentityProvider,
+            conversationCrypto = conversationCrypto,
+            conversationKeyStore = conversationKeyStore,
+            logger = logger,
+        )
 
     @Provides
     fun provideUserDao(database: AppDatabase): UserDao = database.userDao()
@@ -235,6 +279,32 @@ private val MIGRATION_7_8 =
                 """
                 ALTER TABLE chats
                 ADD COLUMN type TEXT NOT NULL DEFAULT 'DIRECT'
+                """.trimIndent(),
+            )
+        }
+    }
+
+private val MIGRATION_8_9 =
+    object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE chats ADD COLUMN remoteId TEXT")
+            db.execSQL("ALTER TABLE messages ADD COLUMN remoteId TEXT")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_chats_remoteId ON chats(remoteId)")
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_messages_remoteId ON messages(remoteId)")
+        }
+    }
+
+private val MIGRATION_9_10 =
+    object : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS chat_read_state (
+                    chatId INTEGER NOT NULL PRIMARY KEY,
+                    unreadCount INTEGER NOT NULL DEFAULT 0,
+                    firstUnreadMessageId INTEGER,
+                    FOREIGN KEY(chatId) REFERENCES chats(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                )
                 """.trimIndent(),
             )
         }

@@ -5,9 +5,11 @@ import com.citruschat.citrusmobile.data.local.entity.type.ChatType
 import com.citruschat.citrusmobile.domain.model.Chat
 import com.citruschat.citrusmobile.domain.model.ChatDetails
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
+import com.citruschat.citrusmobile.domain.model.Message
 import com.citruschat.citrusmobile.domain.model.User
 import com.citruschat.citrusmobile.domain.model.UserProfile
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
+import com.citruschat.citrusmobile.domain.repository.MessageRepository
 import com.citruschat.citrusmobile.domain.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,11 +40,12 @@ class HomeViewModelTest {
     fun `selecting user creates direct chat with current user and peer participants`() =
         runTest {
             val chatRepository = FakeChatRepository(createdChatId = 99)
+            val messageRepository = FakeMessageRepository()
             val userRepository =
                 FakeUserRepository(
                     currentUser = User(id = "current-user", email = "me@example.com", username = "me"),
                 )
-            val viewModel = HomeViewModel(chatRepository, userRepository, NoOpLogger)
+            val viewModel = HomeViewModel(chatRepository, messageRepository, userRepository, NoOpLogger)
             val event =
                 backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                     assertEquals(99L, viewModel.openChatEvents.first())
@@ -70,12 +73,13 @@ class HomeViewModelTest {
     fun `selecting current user does not create one participant direct chat`() =
         runTest {
             val chatRepository = FakeChatRepository(createdChatId = 99)
+            val messageRepository = FakeMessageRepository()
             val userRepository =
                 FakeUserRepository(
                     currentUser = User(id = "current-user", email = "me@example.com", username = "me"),
                 )
             val logger = CapturingLogger()
-            val viewModel = HomeViewModel(chatRepository, userRepository, logger)
+            val viewModel = HomeViewModel(chatRepository, messageRepository, userRepository, logger)
 
             viewModel.onUserResultClick(User(id = "current-user", email = "me@example.com", username = "me"))
             advanceUntilIdle()
@@ -126,11 +130,29 @@ private class FakeChatRepository(
         return createdChatId
     }
 
+    override suspend fun syncChats() = Unit
+
     override suspend fun deleteChat(chatId: Long) = Unit
 
     fun emitChats(items: List<ChatListItemSummary>) {
         chats.update { items }
     }
+}
+
+private class FakeMessageRepository : MessageRepository {
+    override fun observeMessages(chatId: Long): Flow<List<Message>> = MutableStateFlow(emptyList())
+
+    override fun observeTotalUnreadCount(): Flow<Int> = MutableStateFlow(0)
+
+    override suspend fun startRealtime(chatId: Long) = Unit
+
+    override suspend fun startRealtimeForChats(chatIds: List<Long>) = Unit
+
+    override suspend fun syncMessages(chatId: Long) = Unit
+
+    override suspend fun sendMessage(message: Message) = Unit
+
+    override fun stopRealtime() = Unit
 }
 
 private class FakeUserRepository(

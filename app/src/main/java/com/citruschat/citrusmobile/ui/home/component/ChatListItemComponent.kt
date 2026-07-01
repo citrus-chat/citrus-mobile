@@ -131,7 +131,28 @@ fun ChatListItemComponent(
                     )
                 }
             }
+
+            if (chat.unreadCount > 0) {
+                Spacer(modifier = Modifier.width(8.dp))
+                UnreadCountBubble(count = chat.unreadCount)
+            }
         }
+    }
+}
+
+@Composable
+private fun UnreadCountBubble(count: Int) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primary,
+    ) {
+        Text(
+            text = count.badgeText(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+        )
     }
 }
 
@@ -225,7 +246,12 @@ private fun MessageDeliveryStatus.label(): String =
         MessageDeliveryStatus.FAILED -> "Failed"
     }
 
+private fun Int.badgeText(): String = if (this > MAX_BADGE_COUNT) MAX_BADGE_TEXT else toString()
+
 private suspend fun loadBitmap(path: String) =
     withContext(Dispatchers.IO) {
         BitmapFactory.decodeFile(path)
     }
+
+private const val MAX_BADGE_COUNT = 99
+private const val MAX_BADGE_TEXT = "99+"

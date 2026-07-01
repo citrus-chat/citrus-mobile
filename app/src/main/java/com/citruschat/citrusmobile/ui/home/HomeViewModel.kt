@@ -8,6 +8,7 @@ import com.citruschat.citrusmobile.domain.model.Chat
 import com.citruschat.citrusmobile.domain.model.ChatListItemSummary
 import com.citruschat.citrusmobile.domain.model.User
 import com.citruschat.citrusmobile.domain.repository.ChatRepository
+import com.citruschat.citrusmobile.domain.repository.MessageRepository
 import com.citruschat.citrusmobile.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,12 +39,26 @@ class HomeViewModel
     @Inject
     constructor(
         private val chatRepository: ChatRepository,
+        private val messageRepository: MessageRepository,
         private val userRepository: UserRepository,
         private val logger: Logger,
     ) : ViewModel() {
         private val searchQuery = MutableStateFlow("")
         private val _openChatEvents = MutableSharedFlow<Long>()
         val openChatEvents = _openChatEvents.asSharedFlow()
+
+        init {
+            viewModelScope.launch {
+                chatRepository.syncChats()
+            }
+            viewModelScope.launch {
+                chatRepository
+                    .observeChatsItems()
+                    .map { chats -> chats.map { chat -> chat.id } }
+                    .distinctUntilChanged()
+                    .collect(messageRepository::startRealtimeForChats)
+            }
+        }
 
         private val searchResults: Flow<SearchResults> =
             searchQuery

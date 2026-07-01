@@ -6,8 +6,12 @@ import com.citruschat.citrusmobile.data.auth.AuthApiClient
 import com.citruschat.citrusmobile.data.auth.AuthRemoteDataSource
 import com.citruschat.citrusmobile.data.auth.EncryptedPrefsTokenStore
 import com.citruschat.citrusmobile.data.auth.TokenStore
+import com.citruschat.citrusmobile.data.chat.ChatApiClient
+import com.citruschat.citrusmobile.data.crypto.ConversationCrypto
+import com.citruschat.citrusmobile.data.crypto.ConversationKeyStore
 import com.citruschat.citrusmobile.data.device.DeviceIdentityProvider
 import com.citruschat.citrusmobile.data.device.EncryptedPrefsDeviceIdentityProvider
+import com.citruschat.citrusmobile.data.message.MessageApiClient
 import com.citruschat.citrusmobile.data.repository.AuthRepositoryImpl
 import com.citruschat.citrusmobile.data.user.UserApiClient
 import com.citruschat.citrusmobile.data.user.UserRemoteDataSource
@@ -48,6 +52,40 @@ object AuthModule {
     fun provideDeviceIdentityProvider(
         provider: EncryptedPrefsDeviceIdentityProvider,
     ): DeviceIdentityProvider = provider
+
+    @Provides
+    @Singleton
+    fun provideChatApiClient(
+        okHttpClient: OkHttpClient,
+        tokenStore: TokenStore,
+        logger: Logger,
+    ): ChatApiClient =
+        ChatApiClient(
+            okHttpClient = okHttpClient,
+            tokenStore = tokenStore,
+            logger = logger,
+            baseUrl = BuildConfig.API_BASE_URL,
+        )
+
+    @Provides
+    @Singleton
+    fun provideMessageApiClient(
+        okHttpClient: OkHttpClient,
+        tokenStore: TokenStore,
+        deviceIdentityProvider: DeviceIdentityProvider,
+        conversationCrypto: ConversationCrypto,
+        conversationKeyStore: ConversationKeyStore,
+        logger: Logger,
+    ): MessageApiClient =
+        MessageApiClient(
+            okHttpClient = okHttpClient,
+            tokenStore = tokenStore,
+            deviceIdentityProvider = deviceIdentityProvider,
+            conversationCrypto = conversationCrypto,
+            conversationKeyStore = conversationKeyStore,
+            logger = logger,
+            baseUrl = BuildConfig.API_BASE_URL,
+        )
 
     @Provides
     @Singleton

@@ -16,11 +16,12 @@ import com.citruschat.citrusmobile.domain.model.MessageDeliveryStatus
             onDelete = ForeignKey.CASCADE,
         ),
     ],
-    indices = [Index("chatId")],
+    indices = [Index("chatId"), Index(value = ["remoteId"], unique = true)],
 )
 data class MessageEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val remoteId: String? = null,
     val user: String,
     val text: String,
     val isOwn: Boolean,
